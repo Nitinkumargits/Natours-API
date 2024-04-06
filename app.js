@@ -33,6 +33,37 @@ app.get('/api/v1/tours', (req, res) => {
   });
 });
 
+app.get('/api/v1/tours/:id', (req, res) => {
+  console.log(req.params); //req.params-all the variable/parameter value are stored,:id - this variable in url are called params|| o/p { id: '6' }
+  /**  
+  find()-pass a callback function,it will loop through the array and in each of the itreation we will access to current element,we will return either true and false in each iteration,find() will create an array only conatin the element when the comparision come out to true
+ */
+  const idparams = req.params.id * 1; //multiple string that look like a number,multiple with another number,then it automatically convert that string into number
+  if (idparams > tours.length) {
+    return res.status(404).json({
+      status: 'FAIL',
+      message: 'Invaild ID .',
+    });
+  }
+  const tour = tours.find((el) => el.id === idparams);
+
+  //another way to handle error
+  if (!tour) {
+    return res.status(404).json({
+      status: 'FAIL',
+      message: 'Invaild ID .',
+    });
+  }
+
+  res.status(200).json({
+    status: 'SUCCESS',
+    data: {
+      //data we want to send
+      tours: tour,
+    },
+  });
+});
+
 app.post('/api/v1/tours', (req, res) => {
   /**
    * 5>fist thing is to do figure out the id of the new object, in RESTAPI we learn about that we create
