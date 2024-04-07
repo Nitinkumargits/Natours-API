@@ -1,18 +1,41 @@
 const fs = require('fs');
 const express = require('express');
+const morgon = require('morgan');
 const app = express();
-//middleWare
+/**-----------middleWare------------------------------*/
+app.use(morgon('dev'));
+/** 
+ calling morgon() function will return function similar to this (req, res, next) => {};
+ */
 app.use(express.json());
+
+app.use((req, res, next) => {
+  //log to console each time there's a new  request
+  console.log('HELLO from the middle ware');
+  /** 
+    never forget to use next in all middleware,if we didn't call next(),
+    then the request/response cycle stuck at this point,we never able to send response to client
+   */
+  next();
+});
+
+app.use((req, res, next) => {
+  //we hv route handler that really need the information when exactly requst happen,add something like this using middleware
+  req.reqestTime = new Date().toISOString();
+  next();
+});
 
 const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
-
+/**-----------Route-handler------------------------------*/
 const getAllTours = (req, res) => {
+  console.log(req.reqestTime);
   //send back all the tours to client
   res.status(200).json({
     status: 'success',
     results: tours.length,
+    requestedAt: req.reqestTime,
     // data-property : so called envelope for our data
     data: {
       // tours:tours
@@ -91,6 +114,9 @@ const deleteTour = (req, res) => {
     data: null, //resource we deleted is no longer exist
   });
 };
+
+/**-----------Routes------------------------------*/
+
 //in this we can chain the get and post method (handle dry)
 // app.get('/api/v1/tours', getAllTours);//same as above
 // app.post('/api/v1/tours', createTour);
@@ -104,6 +130,7 @@ app
   .patch(updateTour)
   .delete(deleteTour);
 
+/**-----------Start Server------------------------------*/
 const port = 3000;
 app.listen(port, () => {
   console.log(`App start at port : ${port} 🚀🚀🚀`);
