@@ -3,25 +3,13 @@ const express = require('express');
 const app = express();
 //middleWare
 app.use(express.json());
-/**
-        ///2>express.json() is middleware,middleware is function that can modify the incoming request data,is called middleware bcz is stand b/w the req and res,its just a step that request request goes through while its being processed and the request goes through,is simply that the data from the body add to request obj by using middleware
- */
 
-/**
- 
-    //JSON.parse so that it automatically converted to js obj or array of js-obj
- */
 const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
-/**  
- 
-    //route handler-callback will run event loop,so here we can't have blocking code
-    //__dirname is folder where current script located
- */
-app.get('/api/v1/tours', (req, res) => {
-  //send back all the tours to client
 
+const getAllTours = (req, res) => {
+  //send back all the tours to client
   res.status(200).json({
     status: 'success',
     results: tours.length,
@@ -31,20 +19,13 @@ app.get('/api/v1/tours', (req, res) => {
       tours,
     },
   });
-});
+};
 
-app.get('/api/v1/tours/:id', (req, res) => {
-  console.log(req.params); //req.params-all the variable/parameter value are stored,:id - this variable in url are called params|| o/p { id: '6' }
-  /**  
-  find()-pass a callback function,it will loop through the array and in each of the itreation we will access to current element,we will return either true and false in each iteration,find() will create an array only conatin the element when the comparision come out to true
- */
-  const idparams = req.params.id * 1; //multiple string that look like a number,multiple with another number,then it automatically convert that string into number
-  if (idparams > tours.length) {
-    return res.status(404).json({
-      status: 'FAIL',
-      message: 'Invaild ID .',
-    });
-  }
+const getTour = (req, res) => {
+  console.log(req.params);
+
+  const idparams = req.params.id * 1;
+
   const tour = tours.find((el) => el.id === idparams);
 
   //another way to handle error
@@ -62,34 +43,17 @@ app.get('/api/v1/tours/:id', (req, res) => {
       tours: tour,
     },
   });
-});
-
-app.post('/api/v1/tours', (req, res) => {
-  /**
-   * 5>fist thing is to do figure out the id of the new object, in RESTAPI we learn about that we create
-   * new object,we never specify the id of object, the database usally take care of it, new object    automatically get its new id, but in this case we don't have database,so what we gonna do is to simply take the id of the last object and then add +1 to that
-   */
+};
+const createTour = (req, res) => {
   const newId = tours[tours.length - 1].id + 1;
-  /**  
-   6>object.assign()--allow to create object,by merging two existing object together
-  */
+
   const newTours = Object.assign({ id: newId }, req.body);
   tours.push(newTours);
-  /**  
-   7> we are inside of a callback, thats gonna run in the event loop , so we can't block event loop
-   use the writeFile() not the synchronous one....,in this we pass the callback function which gonna processed in backgoround,when its ready its push it event, in one of the event loop queue
-   which is then gonna be handled as soon as the event loop passes the phase
-   writeFile(file We want to write to,data we want to write(tours)-also need to strigify this object we want json in tours-simple.json file,callbackfunction i.e err)
-   */
 
   fs.writeFile(
     `${__dirname}/dev-data/data/tours-simple.json`,
     JSON.stringify(tours),
     (err) => {
-      /** 
-         8> what we want to do as soon as the file is written,send the newly created object as response ,
-         status(201)-means created
-     */
       res.status(201).json({
         status: 'SUCCESS',
         body: {
@@ -98,28 +62,47 @@ app.post('/api/v1/tours', (req, res) => {
       });
     }
   );
-  //   res.send('DONE');--cant send two responses
-});
+};
 
-// /** 1>
-//  -post request we can send data from client to server, this data is ideally available on the request,
-//  request-obj hold all the data/information about the request that was done,if that some data that was
-//  sent ,well that data should be on the request
-//  -out of the box express,doen't put that body data on the request,in order to have data available
-//  we have to use something called middleware
+const updateTour = (req, res) => {
+  if (req.params.idparams * 1 > tours.length) {
+    return res.status(404).json({
+      status: 'FAIL',
+      message: 'Invaild ID .',
+    });
+  }
+  res.status(200).json({
+    status: 'Succes',
+    data: {
+      tour: '<updated tours>', //real world we get the updated data back
+    },
+  });
+};
 
-//  */
-
-// app.post('/api/v1/tours', (req, res) => {
-//   /**
-//     3> body is the property that is gonna be available on the request,bcz we  use the middleware
-//     then  also need to send back a response
-//    */
-//   res.send('DONE');
-//   /**
-//    * //4> we always need to send back something in order to finished the request/respose cycle
-//    * */
-// });
+const deleteTour = (req, res) => {
+  if (req.params.idparams * 1 > tours.length) {
+    return res.status(404).json({
+      status: 'FAIL',
+      message: 'Invaild ID .',
+    });
+  }
+  res.status(204).json({
+    status: 'Succes',
+    data: null, //resource we deleted is no longer exist
+  });
+};
+//in this we can chain the get and post method (handle dry)
+// app.get('/api/v1/tours', getAllTours);//same as above
+// app.post('/api/v1/tours', createTour);
+// app.get('/api/v1/tours/:id', getTour);
+// app.patch('/api/v1/tours/:id', updateTour);
+// app.delete('/api/v1/tours/:id', deleteTour);
+app.route('/api/v1/tours').get(getAllTours).post(createTour);
+app
+  .route('/api/v1/tours/:id')
+  .get(getTour)
+  .patch(updateTour)
+  .delete(deleteTour);
 
 const port = 3000;
 app.listen(port, () => {
