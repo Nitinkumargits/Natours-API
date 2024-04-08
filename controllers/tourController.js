@@ -3,6 +3,29 @@ const fs = require('fs');
 const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 );
+
+exports.checkID = (req, res, next, val) => {
+  console.log(`Tour id (from error handler) is : ${val}`);
+  if (req.params.id * 1 > tours.length) {
+    return res.status(404).json({
+      status: 'FAIL',
+      message: 'Invaild ID .',
+    });
+  }
+  next();
+};
+
+exports.checkBody = (req, res, next) => {
+  if (!req.body.name || !req.body.price) {
+    return res.status(400).json({
+      status: 'Fail',
+      message: 'Missing name and price 🤑',
+    });
+  }
+  //if correct then move to next middleware that must be createTour
+  next();
+};
+
 exports.getAllTours = (req, res) => {
   //   console.log(req.reqestTime);
   //send back all the tours to client
@@ -19,19 +42,9 @@ exports.getAllTours = (req, res) => {
 };
 
 exports.getTour = (req, res) => {
-  console.log(req.params);
-
   const idparams = req.params.id * 1;
 
   const tour = tours.find((el) => el.id === idparams);
-
-  //another way to handle error
-  if (!tour) {
-    return res.status(404).json({
-      status: 'FAIL',
-      message: 'Invaild ID .',
-    });
-  }
 
   res.status(200).json({
     status: 'SUCCESS',
@@ -62,12 +75,6 @@ exports.createTour = (req, res) => {
 };
 
 exports.updateTour = (req, res) => {
-  if (req.params.idparams * 1 > tours.length) {
-    return res.status(404).json({
-      status: 'FAIL',
-      message: 'Invaild ID .',
-    });
-  }
   res.status(200).json({
     status: 'Succes',
     data: {
@@ -77,12 +84,6 @@ exports.updateTour = (req, res) => {
 };
 
 exports.deleteTour = (req, res) => {
-  if (req.params.idparams * 1 > tours.length) {
-    return res.status(404).json({
-      status: 'FAIL',
-      message: 'Invaild ID .',
-    });
-  }
   res.status(204).json({
     status: 'Succes',
     data: null, //resource we deleted is no longer exist
