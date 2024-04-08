@@ -1,12 +1,16 @@
 const express = require('express');
 const morgon = require('morgan');
+
 const app = express();
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 /**-----------middleWare------------------------------*/
-// these middleware we want to apply to alll the routes
-app.use(morgon('dev'));
+if (process.env.NODE_ENV === 'development') {
+  // these middleware we want to apply to alll the routes
+  app.use(morgon('dev'));
+}
 app.use(express.json());
+app.use(express.static(`${__dirname}/public`));
 
 app.use((req, res, next) => {
   //log to console each time there's a new  request

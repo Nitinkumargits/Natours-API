@@ -27,7 +27,7 @@ exports.checkBody = (req, res, next) => {
 };
 
 exports.getAllTours = (req, res) => {
-  //   console.log(req.reqestTime);
+  console.log(req.reqestTime);
   //send back all the tours to client
   res.status(200).json({
     status: 'success',
