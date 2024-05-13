@@ -1,16 +1,5 @@
 const Tour = require('./../model/tourModel');
 
-exports.checkBody = (req, res, next) => {
-  if (!req.body.name || !req.body.price) {
-    return res.status(400).json({
-      status: 'Fail',
-      message: 'Missing name and price 🤑'
-    });
-  }
-  //if correct then move to next middleware that must be createTour
-  next();
-};
-
 exports.getAllTours = (req, res) => {
   console.log(req.reqestTime);
   //send back all the tours to client
@@ -38,13 +27,31 @@ exports.getTour = (req, res) => {
   });
 };
 
-exports.createTour = (req, res) => {
-  res.status(201).json({
-    status: 'SUCCESS'
-    // body: {
-    //   tours: newTours
-    // }
-  });
+exports.createTour = async (req, res) => {
+  try {
+    //create a new Tour based on the data that come in from the body
+
+    //how we created Document for new tour
+    // const newTour = new Tour({});
+    // newTour.save();//we call the method on new Document(newTour)
+
+    //better way to create document
+    //we call the create() method directly on the Tour model itself,create() return a promise
+    const newTour = await Tour.create(req.body);
+
+    res.status(200).json({
+      status: 'SUCCESS',
+      body: {
+        tour: newTour
+      }
+    });
+  } catch (err) {
+    //when we are trying to creating document without one of the required fields i.e is the validation error ,it is one of the error we catched here
+    res.status(400).json({
+      status: 'Fail',
+      message: 'Invalid data send'
+    });
+  }
 };
 
 exports.updateTour = (req, res) => {
