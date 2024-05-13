@@ -2,14 +2,19 @@ const express = require('express');
 const morgon = require('morgan');
 
 const app = express();
+
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
-/**-----------middleWare------------------------------*/
+
+/**-----------middleWare-------------------------*/
 if (process.env.NODE_ENV === 'development') {
-  // these middleware we want to apply to alll the routes
+  // these middleware we want to apply to all the routes
   app.use(morgon('dev'));
 }
+
 app.use(express.json());
+
+//for static file like (html,css,img)
 app.use(express.static(`${__dirname}/public`));
 
 app.use((req, res, next) => {
@@ -23,7 +28,7 @@ app.use((req, res, next) => {
   next();
 });
 
-//---------------------------------------------------------------------------------
+//--------------------------------------------
 
 //Mounting the router(mounting new-router(tourRouter middlerware,userRouter middlerware)  to route these two router will be a middlerware that's why we put inside app.use() in order to mount them)
 app.use('/api/v1/tours', tourRouter);
