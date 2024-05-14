@@ -4,13 +4,28 @@ const Tour = require('./../model/tourModel');
 
 exports.getAllTours = async (req, res) => {
   try {
-    console.log(req.query);
+    //Build the query
+    const queryObj = { ...req.query };
+    const excludedFields = ['page', 'sort', 'limit', 'fields'];
+    excludedFields.forEach(el => delete queryObj[el]);
+    /**
+      console.log(req.query, queryObj);
+      output:::::
+      { duration: '5', difficulty: 'easy', sort: '1', page: '2', 
+      limit: '3' } { duration: '5', difficulty: 'easy' }
+     */
     /** 
-    find()- to find all the document from the Tour-collection
+     find()- to find all the document from the Tour-collection
+     this find() method return a query or Tour.find(queryObj); all return a query, thats the reason we can chain other method like (.where().equal())
    */
-    const tours = await Tour.find();
+    const query = Tour.find(queryObj);
+    /**
+      const query=Tour.find().where('duration').equals(5).where('difficulty').equals('easy');
+     */
+    //excute the query
+    const tours = await query;
 
-    //send back all the tours to client
+    //Send Response   back all the tours to client
     res.status(200).json({
       status: 'success',
       results: tours.length,
