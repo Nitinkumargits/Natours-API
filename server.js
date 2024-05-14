@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const app = require('./app');
 
 dotenv.config({ path: './config.env' }); //this command will do read our variable from the file and save them in nodejs enviroment variable
 
+const app = require('./app');
 /**MongoDB */
 /** connection string for mongoose i.e DB */
 const DB = process.env.DATABASE.replace(

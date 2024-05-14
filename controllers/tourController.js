@@ -4,6 +4,7 @@ const Tour = require('./../model/tourModel');
 
 exports.getAllTours = async (req, res) => {
   try {
+    console.log(req.query);
     /** 
     find()- to find all the document from the Tour-collection
    */
