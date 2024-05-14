@@ -1,13 +1,26 @@
 //CRUD operation with MongoDB (performed in API)
 
+const { json } = require('express');
 const Tour = require('./../model/tourModel');
 
 exports.getAllTours = async (req, res) => {
   try {
+    console.log(req.query);
     //Build the query
+    //---filtering
     const queryObj = { ...req.query };
     const excludedFields = ['page', 'sort', 'limit', 'fields'];
     excludedFields.forEach(el => delete queryObj[el]);
+
+    //---Adavanced filtering
+    //convert object to string
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(gte|gt|lt|lte)\b/g, match => `$${match}`);
+    /** 
+      console.log(JSON.parse(queryStr));
+      { duration: { gte: '5' }, difficulty: 'easy' }  
+      { duration: { '$gte': '5' }, difficulty: 'easy' }
+    */
     /**
       console.log(req.query, queryObj);
       output:::::
@@ -18,7 +31,7 @@ exports.getAllTours = async (req, res) => {
      find()- to find all the document from the Tour-collection
      this find() method return a query or Tour.find(queryObj); all return a query, thats the reason we can chain other method like (.where().equal())
    */
-    const query = Tour.find(queryObj);
+    const query = Tour.find(JSON.parse(queryStr));
     /**
       const query=Tour.find().where('duration').equals(5).where('difficulty').equals('easy');
      */
