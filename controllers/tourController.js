@@ -1,42 +1,28 @@
 //CRUD operation with MongoDB (performed in API)
 
-const { json } = require('express');
 const Tour = require('./../model/tourModel');
+const APIFeatures = require('./../utils/APIFeatures');
+
+//middleware
+exports.aliasTopTours = (req, res, next) => {
+  //maniputlate the query object or prefill(?limit=5&sort=-ratingsAverage,price)
+  req.query.limit = '5';
+  req.query.sort = '-ratingsAverage,price';
+  req.query.fields = 'name,price,difficulty,ratingsAverage,summary';
+  next();
+};
 
 exports.getAllTours = async (req, res) => {
   try {
-    console.log(req.query);
-    //Build the query
-    //---filtering
-    const queryObj = { ...req.query };
-    const excludedFields = ['page', 'sort', 'limit', 'fields'];
-    excludedFields.forEach(el => delete queryObj[el]);
+    //---------------excute the query------------------------------------------
 
-    //---Adavanced filtering
-    //convert object to string
-    let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|gt|lt|lte)\b/g, match => `$${match}`);
-    /** 
-      console.log(JSON.parse(queryStr));
-      { duration: { gte: '5' }, difficulty: 'easy' }  
-      { duration: { '$gte': '5' }, difficulty: 'easy' }
-    */
-    /**
-      console.log(req.query, queryObj);
-      output:::::
-      { duration: '5', difficulty: 'easy', sort: '1', page: '2', 
-      limit: '3' } { duration: '5', difficulty: 'easy' }
-     */
-    /** 
-     find()- to find all the document from the Tour-collection
-     this find() method return a query or Tour.find(queryObj); all return a query, thats the reason we can chain other method like (.where().equal())
-   */
-    const query = Tour.find(JSON.parse(queryStr));
-    /**
-      const query=Tour.find().where('duration').equals(5).where('difficulty').equals('easy');
-     */
-    //excute the query
-    const tours = await query;
+    //new APIFeatures(query-Object,queryString comming from exprsess)
+    const features = new APIFeatures(Tour.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+    const tours = await features.query;
 
     //Send Response   back all the tours to client
     res.status(200).json({
@@ -114,9 +100,7 @@ exports.updateTour = async (req, res) => {
     /**
      - query for the document that we want to update based on id 
      - Tour.findByIdAndUpdate(id,Data we want to change,pass some options {new:true}->new update document will return )
-      
-      */
-
+    */
     const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true

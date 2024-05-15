@@ -55,7 +55,8 @@ const toursSchema = new mongoose.Schema({
   //createAt is timeStamp that is set by the time that a user get a new tour(must created automatically)
   createAt: {
     type: Date,
-    default: Date.now() //timestamp in milliseconds(represent current milliseconds)
+    default: Date.now(), //timestamp in milliseconds(represent current milliseconds)
+    select: false //not want in res-json
   },
   //startsDate-> where differnt tour start(or diff date for same tour)/ diff instances of the tour starting on diff dates, not create automatically by MongoDB, MDB will try to parse the string that we parse in as a date into real JS-dates e.g "2024-05-14T09:04:43.039+00:00"
   startDates: [Date]
