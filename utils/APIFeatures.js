@@ -4,6 +4,8 @@ class APIFeatures {
     this.query = query;
     this.queryStr = queryStr;
   }
+  //req.query>>>>replace>>>>>this.queryStr
+  //query>>>>>>>replace>>>this.query
 
   //Method for each of the functionality
 
@@ -48,8 +50,6 @@ class APIFeatures {
 
     return this;
   }
-
-  //req.query>>>>>replace>>>>>this.queryStr
 
   paginate() {
     const page = this.queryStr.page * 1 || 1; //query || pageNumber=1
