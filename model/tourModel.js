@@ -63,7 +63,11 @@ const toursSchema = new mongoose.Schema(
       select: false //not want in res-json
     },
     //startsDate-> where differnt tour start(or diff date for same tour)/ diff instances of the tour starting on diff dates, not create automatically by MongoDB, MDB will try to parse the string that we parse in as a date into real JS-dates e.g "2024-05-14T09:04:43.039+00:00"
-    startDates: [Date]
+    startDates: [Date],
+    secretTour: {
+      type: Boolean,
+      default: false
+    }
   },
   //object for schema-option
   {
@@ -112,7 +116,29 @@ toursSchema.post('save', function(doc, next) {
   console.log('Document:', doc);
   next();
 });
+//////////////////////////////////////////////////////////////////////////////////////////////
 
+//Query Middleware
+/**
+ let suppose we can have secret tours in our database(tours that offer internallylike VIP gp of people ,public shouldn't know about),so this secret tour we don't want to appear in result output,
+ -we gonna create a secret tour field and then query only for those tour that are not  secret 
+
+ -we using find-query(Tour.find() in   const features = new APIFeatures(Tour.find()>>here, req.query)) there for find-hook is executed 
+ */
+toursSchema.pre(/^find/, function(next) {
+  //this-keyword point to crurrent query not the document , "this" is the query-obj so that we can chain all of the query
+  this.find({ secretTour: { $ne: true } }); //other tours are not currently set to false
+  this.start = Date.now();
+  next();
+});
+/**
+ post query-Middleware run after query get executed,so it can access document that were return, bcz query finished at this point
+ */
+toursSchema.post(/^find/, function(docs, next) {
+  console.log(`Query took ${Date.now() - this.start} millisecond`);
+  console.log('Query docs:', docs);
+  next();
+});
 /** mongoDB Model */
 
 const Tour = new mongoose.model('Tour', toursSchema);
