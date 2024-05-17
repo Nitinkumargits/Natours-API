@@ -1,5 +1,9 @@
+/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable new-cap */
+
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+// const validator = require('validator');
 /** MongoDB schema  */
 
 const toursSchema = new mongoose.Schema(
@@ -9,7 +13,11 @@ const toursSchema = new mongoose.Schema(
       type: String,
       require: [true, 'A tour must have Name'],
       unique: true,
-      trim: true
+      trim: true,
+      maxlength: [40, 'A tour must have less or equal to 40 characters'],
+      minlength: [10, 'A tour must have more or equal to 10 characters']
+      //validator-package
+      // validate: [validator.isAlpha, 'Tour name must be contain character']//it remove the spaces b/w name not needed
     },
     slug: String,
     duration: {
@@ -24,12 +32,20 @@ const toursSchema = new mongoose.Schema(
       type: String,
       require: [
         true,
-        'A tour must have the Difficulty <<Easy || medium || hard >>'
-      ]
+        'A tour must have the Difficulty <<Easy || medium || difficult >>'
+      ],
+      //data-validation(enum is only for strings )
+      enum: {
+        values: ['easy', 'medium', 'difficulty'],
+        message: 'Difficulty is either easy,medium and difficult'
+      }
     },
     ratingsAverage: {
       type: Number,
-      default: 4.5
+      default: 4.5,
+      //data-validation(for number and dates)
+      min: [1, 'Rating must be above 1.0'],
+      max: [5, 'Rating must be below 5.0']
     },
     ratingsQuantity: {
       type: Number,
@@ -39,7 +55,16 @@ const toursSchema = new mongoose.Schema(
       type: Number,
       require: [true, 'A tour must have price']
     },
-    priceDiscount: Number,
+    priceDiscount: {
+      type: Number,
+      validate: {
+        validator: function(val) {
+          // this-keyword only points to currents doc on NEW document creation(not for update)
+          return val < this.price; // priceDiscount is 100 < real price 200 -- return true
+        },
+        message: 'Discount price ({VALUE}) should be below the regular price' //VALUE=val
+      }
+    },
     summary: {
       type: String,
       trim: true, //trim schema type only work for string(remove white space in begining and end)
@@ -135,12 +160,54 @@ toursSchema.pre(/^find/, function(next) {
  post query-Middleware run after query get executed,so it can access document that were return, bcz query finished at this point
  */
 toursSchema.post(/^find/, function(docs, next) {
-  console.log(`Query took ${Date.now() - this.start} millisecond`);
-  console.log('Query docs:', docs);
+  // eslint-disable-next-line no-console
+  // console.log(`Query took ${Date.now() - this.start} millisecond`);
+  // console.log('Query docs:', docs);
+  next();
+});
+
+/** 
+ Aggregation Middleware
+ 
+ -
+ */
+
+toursSchema.pre('aggregate', function(next) {
+  console.log(this); //point to current aggregation
+  console.log(this.pipeline());
+  /**
+       Aggregate {
+      _pipeline: [
+        { '$match': [Object] },
+        { '$group': [Object] },
+        { '$sort': [Object] }
+      ],
+      _model: Model { Tour },
+      options: {}
+    }
+    [
+      { '$match': { ratingsAverage: [Object] } },
+      {
+        '$group': {
+          _id: [Object],
+          numTours: [Object],
+          numRatings: [Object],
+          avgRating: [Object],
+          avgPrice: [Object],
+          minPrice: [Object],
+          maxPrice: [Object]
+        }
+      },
+      { '$sort': { avgPrice: 1 } }        
+    ]
+   */
+
+  //In order to filter out the secret tour all we have to do is to add another match stages write at the beggin of pipeline array
+  //unshift - to add ele at beggin of the array
+  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
   next();
 });
 /** mongoDB Model */
-
 const Tour = new mongoose.model('Tour', toursSchema);
 
 module.exports = Tour;
