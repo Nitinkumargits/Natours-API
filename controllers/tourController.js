@@ -3,6 +3,7 @@
 const Tour = require('./../model/tourModel');
 const APIFeatures = require('./../utils/APIFeatures');
 const catchAsync = require('./../utils/catchAsync');
+const AppError = require('./../utils/appError');
 
 //middleware
 exports.aliasTopTours = (req, res, next) => {
@@ -12,7 +13,6 @@ exports.aliasTopTours = (req, res, next) => {
   req.query.fields = 'name,price,difficulty,ratingsAverage,summary';
   next();
 };
-catchAsync();
 exports.getAllTours = catchAsync(async (req, res, next) => {
   //---------------excute the query------------------------------------------
 
@@ -39,8 +39,14 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
 exports.getTour = catchAsync(async (req, res, next) => {
   /**
       findById() -> same as Tour.findOne({ _id:req.params.id })
-     */
+  */
   const tour = await Tour.findById(req.params.id);
+
+  /**Handle by global Error Handle  */
+  if (!tour) {
+    return next(new AppError('No Tour find with the ID', 404));
+  }
+
   res.status(200).json({
     status: 'SUCCESS',
     data: {
@@ -73,17 +79,6 @@ exports.createTour = catchAsync(async (req, res, next) => {
       tour: newTour
     }
   });
-
-  // try {
-  // } catch (err) {
-  //   /**
-  //     //when we are trying to creating document without one of the required fields i.e is the validation error ,it is one of the error we catched here
-  //    */
-  //   res.status(400).json({
-  //     status: 'Fail',
-  //     message: err
-  //   });
-  // }
 });
 
 exports.updateTour = catchAsync(async (req, res, next) => {
@@ -95,6 +90,10 @@ exports.updateTour = catchAsync(async (req, res, next) => {
     new: true,
     runValidators: true
   });
+  /**Handle by global Error Handle  */
+  if (!tour) {
+    return next(new AppError('No Tour find with the ID', 404));
+  }
 
   res.status(200).json({
     status: 'Succes',
@@ -106,7 +105,11 @@ exports.updateTour = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteTour = catchAsync(async (req, res, next) => {
-  await Tour.findByIdAndDelete(req.params.id);
+  const tour = await Tour.findByIdAndDelete(req.params.id);
+  /**Handle by global Error Handle  */
+  if (!tour) {
+    return next(new AppError('No Tour find with the ID', 404));
+  }
   res.status(204).json({
     status: 'Succes',
     data: null //resource we deleted is no longer exist
