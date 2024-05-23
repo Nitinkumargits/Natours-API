@@ -25,7 +25,10 @@ app.use((req, res, next) => {
 });
 
 //--------------------------------------------
-//Mounting the router(mounting new-router(tourRouter middlerware,userRouter middlerware)  to route these two router will be a middlerware that's why we put inside app.use() in order to mount them)
+/**Mounting the router */
+/**
+  //Mounting the router(mounting new-router(tourRouter middlerware,userRouter middlerware)  to route these two router will be a middlerware that's why we put inside app.use() in order to mount them)
+ */
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 //----------------------------------------------

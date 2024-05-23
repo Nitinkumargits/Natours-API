@@ -5,7 +5,7 @@ const APIFeatures = require('./../utils/APIFeatures');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 
-//middleware
+//middleware('/top-5-cheap' route)
 exports.aliasTopTours = (req, res, next) => {
   //maniputlate the query object or prefill(?limit=5&sort=-ratingsAverage,price)
   req.query.limit = '5';

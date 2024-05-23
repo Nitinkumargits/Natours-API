@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-/**Catching uncaught Exception(top of code ) */
 
+/**Catching uncaught Exception(top of code ) */
 process.on('uncaughtException', err => {
   console.log('Uncaught Exception shutting down ....');
   console.log(err.name, err.message);
@@ -12,6 +12,7 @@ process.on('uncaughtException', err => {
 dotenv.config({ path: './config.env' }); //this command will do read our variable from the file and save them in nodejs enviroment variable
 
 const app = require('./app');
+
 /**MongoDB */
 /** connection string for mongoose i.e DB */
 const DB = process.env.DATABASE.replace(
