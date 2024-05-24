@@ -49,7 +49,9 @@ const userSchema = new mongoose.Schema(
         },
         message: 'Password are not the same'
       }
-    }
+    },
+    /** this property always will change,when someone change the password */
+    passwordChangeAt: Date
   }
 );
 /**Encryption(mongoose middleware- pre()-save middleware i.e document MW) */
@@ -94,6 +96,22 @@ userSchema.methods.correctPassword = async function(
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
+/**Instance method to <4> check if user change password if after the JWT/token was issued */
+userSchema.methods.changePasswordAfter = function(JWTTimeStamp) {
+  if (this.passwordChangeAt) {
+    //if the password change property exist only then we want to do the comparision
+    const changeTimestamp = parseInt(
+      this.passwordChangeAt.getTime() / 1000,
+      10
+    );
+    return JWTTimeStamp < changeTimestamp;
+  }
+  /**
+   bydefault we return false from this method(mean the user has not change his password after the token was issued )
+   */
+  //false means user not change the password therefore return false
+  return false;
+};
 /** model */
 const User = new mongoose.model('User', userSchema);
 

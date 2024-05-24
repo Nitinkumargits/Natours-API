@@ -21,6 +21,9 @@ app.use(express.static(`${__dirname}/public`));
 
 app.use((req, res, next) => {
   req.reqestTime = new Date().toISOString();
+  /**protected routes */
+  // console.log('req-header : ', req.headers); //the one client snd along with there request
+
   next();
 });
 
