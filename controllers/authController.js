@@ -137,3 +137,39 @@ exports.protect = catchAsync(async (req, res, next) => {
   req.user = currentUser;
   next();
 });
+/**
+ usually we cannot pass argument to middleware function, so we create a wrapper function,which will then return the middleware function that we actually wnt to create
+
+ -> ...roles = create a array of all the argument that we specified 
+ i.e roles= ['admin','lead-guid']
+
+ ->req.user = currentUser; from the protect-route middleware
+ ->403 : forbidden
+
+ */
+exports.restrictTo = (...roles) => {
+  //returing Middleware funtion (Closure)
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError("You don't have permission to perform this action !", 403)
+      );
+    }
+    next();
+  };
+};
+
+/**Password Reset functionality */
+exports.forgotPassword = catchAsync(async (req, res, next) => {
+  // 1> Get user based on POSTed email
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    return next(new AppError('There is no user with the email address ', 404));
+  }
+  // 2> Generate the random reset token
+  const resetToken = user.createPasswordResetToken();
+
+  await user.save({ validateBeforeSave: false }); // this will deactivate all the validators that we specified in our schema
+  // 3> send it to user's email
+});
+exports.resetPassword = (req, res, next) => {};

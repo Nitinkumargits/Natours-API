@@ -1,6 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /** user Model */
-
+const crypto = require('crypto');
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
@@ -28,6 +28,18 @@ const userSchema = new mongoose.Schema(
      if the user want to upload the photo,that will store in somewher in  our file-system , and path to that photo is store into this photo-field
      */
     photo: String,
+    role: {
+      type: String,
+      /**
+       enum-validator in order to only allow certain types of roles to be specified ,these roles 
+       must be specific to application domain
+       */
+      enum: {
+        values: ['user', 'guide', 'lead-guide', 'admin'],
+        message: 'Choose a valid role'
+      },
+      default: 'user' // Ensure there's no syntax error here
+    },
 
     password: {
       type: String,
@@ -51,7 +63,10 @@ const userSchema = new mongoose.Schema(
       }
     },
     /** this property always will change,when someone change the password */
-    passwordChangeAt: Date
+    passwordChangeAt: Date,
+    /** passwrod reset  */
+    passwordResetToken: String,
+    passwordResetExpires: Date //this reset will actually expire after the certain amt of time as a security measure
   }
 );
 /**Encryption(mongoose middleware- pre()-save middleware i.e document MW) */
@@ -81,12 +96,12 @@ userSchema.pre('save', async function(next) {
 });
 
 /**Instance Method(method that available on all the document of a certain collection) 
- 
-candidatePassword-password that user pass in the body
-this-keyword point to current document,but this.password is not available bcz in password schema-option we use password {select:false} the password is not available in the output
+     
+    candidatePassword-password that user pass in the body
+    this-keyword point to current document,but this.password is not available bcz in password schema-option we use password {select:false} the password is not available in the output
 
-candidatePassword - not hash(original password comming from the user)
-userPassword - hashed
+    candidatePassword - not hash(original password comming from the user)
+    userPassword - hashed
 */
 
 userSchema.methods.correctPassword = async function(
@@ -111,6 +126,39 @@ userSchema.methods.changePasswordAfter = function(JWTTimeStamp) {
    */
   //false means user not change the password therefore return false
   return false;
+};
+
+/**Instance method(mongoose) for Reset Password  */
+/**
+  the password reset token should basically  be a random string ,but it doesnot need to be crytographically strong as the password hash, we can use the random bytes  function from the built in crypto module
+ --> const resetToken = crypto.randomBytes(32).toString('hex');
+ - crypto= build in node module
+ - .randomBytes(32) => 32 no. of character
+ - .toString('hex') = convert to hexdecimal-string  
+
+ - resetToken => this resetToken is what we gonna snd to the user, so it is like a resetPassword that user then can use to create a new real password ,only the user will have acces to this token , it real behave like a password 
+ - As it is like a password ,it means that if the hacker can get access to our database,well then thats gonna allow the hacker to gain the access to the account by setting a new passwrod , 
+ 
+ - if we would just simply  store  this resetToken in our database , if some attacker gain access to database ,they could then use that token and create a new password using that token instead of you doing it .just like a password we should not store the plain restToken in DB encrypt it 
+ */
+userSchema.methods.createPasswordResetToken = function() {
+  const resetToken = crypto.randomBytes(32).toString('hex');
+
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  console.log(
+    'restToken',
+    { resetToken },
+    'passwordRestToken',
+    this.passwordResetToken
+  );
+
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; //modify it ,not save it
+  //return the plain text token that we gonna send through email
+  return resetToken; // we need to send via email the unencrypted resetToken bcz it would not make much sense to encrypt it, we snd one token via email and then we have encrypted version in our database, and that encrypted one is then basically useless to change the password
 };
 /** model */
 const User = new mongoose.model('User', userSchema);

@@ -14,6 +14,11 @@ router.post('/signup', authContoller.signup);
 // POST-req we want to send login credentials in body
 router.post('/login', authContoller.login);
 //--------------------------------------------------------------
+/**Password Reset routes */
+
+router.post('/forgotPassword', authContoller.forgotPassword); //will only receive the email address
+router.post('/resetPassword', authContoller.resetPassword); // will receive the token as well as new Password
+//--------------------------------------------------------------
 router
   .route('/')
   .get(userController.getAllUsers)
