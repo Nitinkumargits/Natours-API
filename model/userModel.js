@@ -30,15 +30,8 @@ const userSchema = new mongoose.Schema(
     photo: String,
     role: {
       type: String,
-      /**
-       enum-validator in order to only allow certain types of roles to be specified ,these roles 
-       must be specific to application domain
-       */
-      enum: {
-        values: ['user', 'guide', 'lead-guide', 'admin'],
-        message: 'Choose a valid role'
-      },
-      default: 'user' // Ensure there's no syntax error here
+      enum: ['user', 'guide', 'lead-guide', 'admin'],
+      default: 'user'
     },
 
     password: {
@@ -149,12 +142,12 @@ userSchema.methods.createPasswordResetToken = function() {
     .update(resetToken)
     .digest('hex');
 
-  console.log(
-    'restToken',
-    { resetToken },
-    'passwordRestToken',
-    this.passwordResetToken
-  );
+  // console.log(
+  //   'restToken',
+  //   { resetToken },
+  //   'passwordRestToken',
+  //   this.passwordResetToken
+  // );
 
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000; //modify it ,not save it
   //return the plain text token that we gonna send through email
