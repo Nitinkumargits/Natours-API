@@ -229,7 +229,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
     return next(
       new AppError(
-        'There was an error sending an email. Try again later !',
+        'There was an error sending the email. Try again later!',
         500
       )
     );
@@ -243,7 +243,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
    now we need to encrypted the original token again so we can compare it with the one that is stored so the encrypted one in DB
    */
   const hasedToken = crypto
-    .createHash(256)
+    .createHash('sha256')
     .update(req.params.token)
     .digest('hex');
   const user = await User.findOne({

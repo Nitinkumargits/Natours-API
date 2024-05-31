@@ -1,3 +1,6 @@
+/* eslint-disable import/newline-after-import */
+/* eslint-disable import/order */
+/* eslint-disable import/no-extraneous-dependencies */
 const express = require('express');
 const morgon = require('morgan');
 const AppError = require('./utils/appError');
@@ -6,6 +9,7 @@ const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
+// eslint-disable-next-line import/no-extraneous-dependencies
 const hpp = require('hpp');
 const app = express();
 

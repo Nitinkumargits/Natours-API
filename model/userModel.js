@@ -11,17 +11,16 @@ const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      require: [true, 'Please tell us your name !'],
-      trim: true,
-      lowercase: true,
-      unique: true
+      require: [true, 'Please tell us your name !']
     },
     email: {
       type: String,
       lowercase: true,
       //   required: [true, "Email can't be blank"],
       /**from validator-package */
-      validate: [validator.isEmail, 'Please provide an vaild email']
+      validate: [validator.isEmail, 'Please provide an vaild email'],
+      trim: true,
+      unique: true
     },
     /**
      for uplode a photo,but its not require,Photo is mostly optional in web app, 
@@ -36,8 +35,8 @@ const userSchema = new mongoose.Schema(
 
     password: {
       type: String,
-      minlength: 8,
       required: [true, 'Please provide a password'],
+      minlength: 8,
       select: false //help to prevent data-leak to client(never show in any GET-req-output) eg-password
     },
     passwordConfirm: {
