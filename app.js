@@ -3,6 +3,7 @@ const morgon = require('morgan');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorContoller');
 const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 
 const app = express();
 
@@ -10,12 +11,16 @@ const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 
 /**----------Global-middleWare-------------------------*/
+/**Set security HTTP-Header */
+app.use(helmet());
+
+/**Develpment logging */
 if (process.env.NODE_ENV === 'development') {
   // these middleware we want to apply to all the routes
   app.use(morgon('dev'));
 }
 
-//middleware function
+//Limit-request-middleware function from same API
 const limiter = rateLimit({
   max: 100, //allow 100request form the same IP in one hour(if you building an API ,need lot of request for one IP,the max number should be greater)
   windowMs: 60 * 60 * 1000, // 1hour,
@@ -23,11 +28,13 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
-app.use(express.json());
+//Body parser, reading data form the body into req.body
+app.use(express.json({ limit: '10kb' }));
 
 //for static file like (html,css,img)
 app.use(express.static(`${__dirname}/public`));
 
+//Test midddleWare
 app.use((req, res, next) => {
   req.reqestTime = new Date().toISOString();
   /**protected routes */
