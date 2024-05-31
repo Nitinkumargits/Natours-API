@@ -59,7 +59,14 @@ const userSchema = new mongoose.Schema(
     passwordChangeAt: Date,
     /** passwrod reset  */
     passwordResetToken: String,
-    passwordResetExpires: Date //this reset will actually expire after the certain amt of time as a security measure
+    passwordResetExpires: Date, //this reset will actually expire after the certain amt of time as a security measure
+
+    /**for deleting current user */
+    active: {
+      type: Boolean,
+      default: true,
+      select: false
+    }
   }
 );
 /**Encryption(mongoose middleware- pre()-save middleware i.e document MW) */
@@ -87,6 +94,27 @@ userSchema.pre('save', async function(next) {
   this.passwordConfirm = undefined;
   next();
 });
+/**Reset MiddleWare */
+userSchema.pre('save', function(next) {
+  /**
+   We want to set the passwordChangeAt property ,when we actually modifiy the password property,
+   when we create a new Document then we did actually modify the password then we would set the passwordChangeAt-property, 
+   this.isNew= when document is new 
+   */
+  if (!this.isModified('password') || this.isNew) return next();
+  //change passwordChangeAt if pass above condition
+  this.passwordChangeAt = Date.now() - 1000; //subtracting 1sec bcz saving to database is bit slower than issuing the JWT-token,making it so that change password timestamp is sometime set a bit after the jsonWebToken has been created, that will then make it so that the user will not be able to log in using the new token
+  next();
+});
+/** for delete and not show in ouput */
+/** 
+ before User.find() qurey in getAllUser executed  this below query-middleware executed (which is only find document which active-proterty in schema is set to true)
+ */
+userSchema.pre(/^find/, function(next) {
+  //this point to current query
+  this.find({ active: { $ne: false } });
+  next();
+});
 
 /**Instance Method(method that available on all the document of a certain collection) 
      
@@ -96,7 +124,6 @@ userSchema.pre('save', async function(next) {
     candidatePassword - not hash(original password comming from the user)
     userPassword - hashed
 */
-
 userSchema.methods.correctPassword = async function(
   candidatePassword,
   userPassword
@@ -134,6 +161,25 @@ userSchema.methods.changePasswordAfter = function(JWTTimeStamp) {
  
  - if we would just simply  store  this resetToken in our database , if some attacker gain access to database ,they could then use that token and create a new password using that token instead of you doing it .just like a password we should not store the plain restToken in DB encrypt it 
  */
+// userSchema.methods.createPasswordResetToken = function() {
+//   const resetToken = crypto.randomBytes(32).toString('hex');
+
+//   this.passwordResetToken = crypto
+//     .createHash('sha256')
+//     .update(resetToken)
+//     .digest('hex');
+
+//   // console.log(
+//   //   'restToken',
+//   //   { resetToken },
+//   //   'passwordRestToken',
+//   //   this.passwordResetToken
+//   // );
+
+//   this.passwordResetExpires = Date.now() + 10 * 60 * 1000; //modify it ,not save it
+//   //return the plain text token that we gonna send through email
+//   return resetToken; // we need to send via email the unencrypted resetToken bcz it would not make much sense to encrypt it, we snd one token via email and then we have encrypted version in our database, and that encrypted one is then basically useless to change the password
+// };
 userSchema.methods.createPasswordResetToken = function() {
   const resetToken = crypto.randomBytes(32).toString('hex');
 
@@ -142,16 +188,11 @@ userSchema.methods.createPasswordResetToken = function() {
     .update(resetToken)
     .digest('hex');
 
-  // console.log(
-  //   'restToken',
-  //   { resetToken },
-  //   'passwordRestToken',
-  //   this.passwordResetToken
-  // );
+  // console.log({ resetToken }, this.passwordResetToken);
 
-  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; //modify it ,not save it
-  //return the plain text token that we gonna send through email
-  return resetToken; // we need to send via email the unencrypted resetToken bcz it would not make much sense to encrypt it, we snd one token via email and then we have encrypted version in our database, and that encrypted one is then basically useless to change the password
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+
+  return resetToken;
 };
 /** model */
 const User = new mongoose.model('User', userSchema);

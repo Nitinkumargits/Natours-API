@@ -2,17 +2,26 @@ const express = require('express');
 const morgon = require('morgan');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorContoller');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 
-/**-----------middleWare-------------------------*/
+/**----------Global-middleWare-------------------------*/
 if (process.env.NODE_ENV === 'development') {
   // these middleware we want to apply to all the routes
   app.use(morgon('dev'));
 }
+
+//middleware function
+const limiter = rateLimit({
+  max: 100, //allow 100request form the same IP in one hour(if you building an API ,need lot of request for one IP,the max number should be greater)
+  windowMs: 60 * 60 * 1000, // 1hour,
+  message: 'Too many request form this IP , Please try again in 1hour'
+});
+app.use('/api', limiter);
 
 app.use(express.json());
 

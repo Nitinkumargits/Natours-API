@@ -3,6 +3,7 @@
  updating password
  */
 // const util = require('util'); //on this we using promisify method so...(Node have built in promisify func())
+const crypto = require('crypto');
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const catchAsync = require('../utils/catchAsync');
@@ -15,6 +16,31 @@ const signToken = id => {
     expiresIn: process.env.JWT_EXPIRES_IN
   });
 };
+
+const createSendToken = (user, statusCode, res) => {
+  const token = signToken(user._id);
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true
+  };
+  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+
+  res.cookie('jwt', token, cookieOptions);
+
+  // Remove password from output
+  user.password = undefined;
+
+  res.status(statusCode).json({
+    status: 'success',
+    token,
+    data: {
+      user
+    }
+  });
+};
+//---------------------------------------------------------
 exports.signup = catchAsync(async (req, res, next) => {
   /**
       .create(pass obj with data from which user should be created),
@@ -26,20 +52,24 @@ exports.signup = catchAsync(async (req, res, next) => {
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm
   });
-
-  /**signin in/logged in new user */
-  // const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
+  //   signin in/logged in new user */
+  //  const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
   //   expiresIn: process.env.JWT_EXPIRES_IN
   // });
-  const token = signToken(newUser._id);
 
-  res.status(201).json({
-    status: 'Success',
-    token,
-    data: {
-      user: newUser
-    }
-  });
+  createSendToken(newUser, 201, res);
+
+  /**
+     // const token = signToken(newUser._id);
+
+      // res.status(201).json({
+      //   status: 'Success',
+      //   token,
+      //   data: {
+      //     user: newUser
+      //   }
+      // });
+   */
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -76,6 +106,7 @@ exports.login = catchAsync(async (req, res, next) => {
    bcrypt encrypt(pass1234) this and then compare it - create that function in userModel bcz it realted to data itself
    */
   // 3> if everything okay send token(JWT) to client
+
   const token = signToken(user._id);
   res.status(200).json({ status: 'Success', token });
 });
@@ -204,4 +235,61 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     );
   }
 });
-exports.resetPassword = (req, res, next) => {};
+
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  //1> Get user based on the token
+  /**
+   Reset token snt in url are not encrypted token, the one we have in DB is encrypted one ,
+   now we need to encrypted the original token again so we can compare it with the one that is stored so the encrypted one in DB
+   */
+  const hasedToken = crypto
+    .createHash(256)
+    .update(req.params.token)
+    .digest('hex');
+  const user = await User.findOne({
+    passwordResetToken: hasedToken,
+    passwordResetExpires: { $gt: Date.now() } // passwordResetExpires greater than right now,bcz if the expires date greater than now,means its in the future,means it not expires yet
+  });
+  //2> If token has not expired, and there is user , set the new Password
+  if (!user) {
+    return next(new AppError('Token is invaild or has expired', 400));
+  }
+  //modify document
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  user.passwordResetToken = undefined; //delete the reset token
+  user.passwordResetExpires = undefined; //delete the reset expires
+  //save the document
+  await user.save();
+  //3> Update changedPasswordAt property for the user
+  //4> Log the user in , send JWT
+  createSendToken(user, 200, res);
+  // const token = signToken(user._id);
+  // res.status(200).json({
+  //   status: 'Success',
+  //   token
+  // });
+});
+/** only for logged-in user */
+/**
+  this password updating functionality  is only for logged-in user ,but still we need the user to pass in his currentPassword ,so inorder to confirm that user actually is who he say he is . (security measuere )
+
+ */
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  // 1> Get the user form the collection
+  /**
+   this updatePassword is only for authenticate ,So for logged in users, therefore at this point , we will  already have current user on request-object (comming from protect middleware)
+   */
+  const user = await User.findById(req.user.id).select('+password');
+  // 2>check if POSTed current password is correct
+  if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
+    return next(new AppError('Your current password is wrong.', 401));
+  }
+  // 3> if so , update password
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  await user.save();
+  // User.findByIdAndUpdate will NOT work as intended!(.create() and .save())
+  // 4> log user in , snd JWT
+  createSendToken(user, 200, res);
+});
