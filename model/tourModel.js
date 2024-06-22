@@ -3,6 +3,7 @@
 
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const User = require('./userModel');
 // const validator = require('validator');
 /** MongoDB schema  */
 
@@ -128,7 +129,13 @@ const toursSchema = new mongoose.Schema(
         description: String,
         day: Number // date of the tour in which people will goto this location
       }
-    ]
+    ],
+    /**Emebedded */
+    /**
+       - idea here is that when creating a new tour document ,user will simply add an array  of user IDs, and will get  the corresponding user-document based on these idS and then add them to our tour document,means we embeded them 
+      into our tour
+    */
+    guides: Array
   },
   //object for schema-option
   {
@@ -165,6 +172,21 @@ toursSchema.pre('save', function(next) {
   this.slug = slugify(this.name, { lower: true });
   next();
 });
+/**middle ware for Embedded for tour guides */
+/** 
+ create a new tour with two new guides ,once we saved this tour, behind the scenes,retrieve the two user document corresponding to these two IDs,pre-save middle ware will automatically behing the scene each time a new tour is saved 
+ */
+toursSchema.pre('save', async function(next) {
+  //guidesPromises variable is now full promise array
+  const guidesPromises = this.guides.map(async id => await User.findById(id));
+  this.guides = await Promise.all(guidesPromises);
+  next();
+});
+/**
+  - this above simple code work for creating new documents , not for updating so we have to implement the same logic also for update ,not going to do, bcz there are some drawback of embedding the data in this case 
+  eg=> image a tour guide update his email address ,or change role from guides to lead-guide Each time one of these chages would happen then you have to check if a tour has that user as guide, and if so then update the tour as well lot of work not go in that direction , thats how we do embedding but in this case instead of 
+  embedding we do referencing 
+ */
 
 toursSchema.pre('save', function(next) {
   console.log('will save document');
