@@ -3,7 +3,7 @@
 
 const mongoose = require('mongoose');
 const slugify = require('slugify');
-const User = require('./userModel');
+// const User = require('./userModel');
 // const validator = require('validator');
 /** MongoDB schema  */
 
@@ -135,7 +135,18 @@ const toursSchema = new mongoose.Schema(
        - idea here is that when creating a new tour document ,user will simply add an array  of user IDs, and will get  the corresponding user-document based on these idS and then add them to our tour document,means we embeded them 
       into our tour
     */
-    guides: Array
+    //  guides: Array
+    /**
+      Referecing
+      - Idea is that tour and user will always remain compeletly separated entities in our DB, so all we save the certain tour-document is the IDs of the user that are tour-guides for that specific tour then when we query the tour, we want to automatically get access to tour guides but again , without them being actually saved on the tour document itself that exactly is referecing 
+    */
+    guides: [
+      //embedded document/sub-document
+      {
+        type: mongoose.Schema.ObjectId, //we expected a type of each of the elements in the guides array to be a  mongoDB ID
+        ref: 'User' // these how we establish references between different data set in Mongoose
+      }
+    ]
   },
   //object for schema-option
   {
@@ -176,12 +187,12 @@ toursSchema.pre('save', function(next) {
 /** 
  create a new tour with two new guides ,once we saved this tour, behind the scenes,retrieve the two user document corresponding to these two IDs,pre-save middle ware will automatically behing the scene each time a new tour is saved 
  */
-toursSchema.pre('save', async function(next) {
-  //guidesPromises variable is now full promise array
-  const guidesPromises = this.guides.map(async id => await User.findById(id));
-  this.guides = await Promise.all(guidesPromises);
-  next();
-});
+// toursSchema.pre('save', async function(next) {
+//   //guidesPromises variable is now full promise array
+//   const guidesPromises = this.guides.map(async id => await User.findById(id));
+//   this.guides = await Promise.all(guidesPromises);
+//   next();
+// });
 /**
   - this above simple code work for creating new documents , not for updating so we have to implement the same logic also for update ,not going to do, bcz there are some drawback of embedding the data in this case 
   eg=> image a tour guide update his email address ,or change role from guides to lead-guide Each time one of these chages would happen then you have to check if a tour has that user as guide, and if so then update the tour as well lot of work not go in that direction , thats how we do embedding but in this case instead of 
