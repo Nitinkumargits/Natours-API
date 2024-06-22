@@ -36,7 +36,7 @@ const toursSchema = new mongoose.Schema(
       ],
       //data-validation(enum is only for strings )
       enum: {
-        values: ['easy', 'medium', 'difficulty'],
+        values: ['easy', 'medium', 'difficult'],
         message: 'Difficulty is either easy,medium and difficult'
       }
     },
@@ -92,7 +92,43 @@ const toursSchema = new mongoose.Schema(
     secretTour: {
       type: Boolean,
       default: false
-    }
+    },
+    /** GeoSpatial Data */
+    /**
+        MongoDB support GeoSpatial Data out of the box-> data that describe places on earth using longitude and longitude coordinates so we can simple descibe point and describe diff complex geomertry like polygon , multi-polygon 
+
+        - MongoDB use specail data format GeoJSON
+        - startLocation is not really an document itself , it just an object descirbe certain point on eart 
+   */
+    startLocation: {
+      //GeoJSON(this obj is not for schema type options it is embedded obj)
+      type: {
+        type: String,
+        default: 'Point', //polygon or geometry
+        enum: ['Point']
+      },
+      coordinates: [Number], //array (latitude,longitude)
+      address: String,
+      description: String
+    },
+    /** 
+     - in order to create new document and then embed them into another document we need to create an array 
+     - this is how you create embedded document , always need to use the array , by specifying an array of objects,this will create brand new documents inside of parent document which is 
+     in this case tour
+     */
+    location: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point']
+        },
+        coordinates: [Number], //array (latitude,longitude)
+        address: String,
+        description: String,
+        day: Number // date of the tour in which people will goto this location
+      }
+    ]
   },
   //object for schema-option
   {

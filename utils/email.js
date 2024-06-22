@@ -13,7 +13,9 @@ const sendEmail = async options => {
 
   // 2) Define the email options
   const mailOptions = {
-    from: 'Jonas Schmedtmann <hello@jonas.io>',
+    // to: options.email,
+    from: process.env.EMAIL_USER,
+    // from: 'nitin kumar <nitin@gmail.com>',
     to: options.email,
     subject: options.subject,
     text: options.message
@@ -21,6 +23,14 @@ const sendEmail = async options => {
   };
 
   // 3) Actually send the email
+  //   await transporter.sendMail(mailOptions, (error, info) => {
+  //     if (error) {
+  //       return console.log(error);
+  //     }
+  //     console.log('Message sent: %s', info.messageId);
+  //   });
+  //
+
   await transporter.sendMail(mailOptions);
 };
 
