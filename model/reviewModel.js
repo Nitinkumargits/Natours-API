@@ -44,6 +44,20 @@ const reviewSchema = new mongoose.Schema(
   - when we donot really know how much our array will be grows then ist bst to opt for parent-referencing
  */
 
+reviewSchema.pre(/^find/, function(next) {
+  // this.populate({
+  //   path: 'tour',
+  //   select: 'name'
+  // }).populate({
+  //   path: 'user',
+  //   select: 'name photo'
+  // });
+  this.populate({
+    path: 'user',
+    select: 'name photo'
+  });
+  next();
+});
 const Review = mongoose.model('Review', reviewSchema);
 
 module.exports = Review;

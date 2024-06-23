@@ -173,6 +173,12 @@ toursSchema.virtual('durationWeeks').get(function() {
   return this.duration / 7;
 });
 
+toursSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour',
+  localField: '_id'
+});
+
 //Mongoose-Document middleware
 
 /**

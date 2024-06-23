@@ -45,7 +45,7 @@ exports.getTour = catchAsync(async (req, res, next) => {
     -this populate fuction is absolutely fundamental tool for working with data in mongoose and when there are realtionship with data
     -behind the scenes , using populate will still actually create a new query ,it may affect your performace 
   */
-  const tour = await Tour.findById(req.params.id);
+  const tour = await Tour.findById(req.params.id).populate('reviews');
 
   /**Handle by global Error Handle  */
   if (!tour) {
