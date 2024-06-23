@@ -1,5 +1,3 @@
-
-
 //CRUD operation with MongoDB (performed in API)
 
 const Tour = require('./../model/tourModel');
@@ -41,6 +39,11 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
 exports.getTour = catchAsync(async (req, res, next) => {
   /**
       findById() -> same as Tour.findOne({ _id:req.params.id })
+  */
+  /**
+    - // name of the field that we want to populate i.e field calld guides in our model , with populate we actully wnt to fill the data
+    -this populate fuction is absolutely fundamental tool for working with data in mongoose and when there are realtionship with data
+    -behind the scenes , using populate will still actually create a new query ,it may affect your performace 
   */
   const tour = await Tour.findById(req.params.id);
 

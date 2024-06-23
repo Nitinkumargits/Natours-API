@@ -140,6 +140,12 @@ const toursSchema = new mongoose.Schema(
       Referecing
       - Idea is that tour and user will always remain compeletly separated entities in our DB, so all we save the certain tour-document is the IDs of the user that are tour-guides for that specific tour then when we query the tour, we want to automatically get access to tour guides but again , without them being actually saved on the tour document itself that exactly is referecing 
     */
+    /** populate */
+    /**
+      -in order to replace the fields that we referenced with the actual related data and the result we looked as if the data has always been embedded ,but as we know it is in different collection, Now the populate process always happen in query i.e tourController 
+      - this guides field only contain the reference with populate we're gonna fill it up with the actual data but 
+      only in the query not in actual database 
+     */
     guides: [
       //embedded document/sub-document
       {
@@ -223,6 +229,13 @@ toursSchema.pre(/^find/, function(next) {
   //this-keyword point to crurrent query not the document , "this" is the query-obj so that we can chain all of the query
   this.find({ secretTour: { $ne: true } }); //other tours are not currently set to false
   this.start = Date.now();
+  next();
+});
+toursSchema.pre(/^find/, function(next) {
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt'
+  });
   next();
 });
 /**
