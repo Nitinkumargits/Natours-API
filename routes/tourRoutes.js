@@ -1,9 +1,31 @@
 const express = require('express');
 const tourController = require('./../controllers/tourController');
 const authController = require('./../controllers/authController');
-const reviewController = require('./../controllers/reviewController');
+// const reviewController = require('./../controllers/reviewController');
+const reviewRouter = require('./../routes/reviewRoutes');
 
 const router = express.Router();
+
+/**Nested router */
+/**
+   // Post /tour/234afe/reviews
+  // Get /tour/234afe/reviews
+  // Get /tour/234afe/reviews/454ttf
+
+  // router
+  //   .route('/:tourId/reviews')
+  //   .post(
+  //     authController.protect,
+  //     authController.restrictTo('user'),
+  //     reviewController.createReview
+  //   );
+ */
+
+/**
+ - router itself is a middle ware so we can use .use() method on it then say that this specific route  '/:tourId/reviews' , we wnt to use the reviewRouter instead , agian it is actually mounting a router 
+ -we will basically say that this tour-router should use the review-router in case it ever encouter with route like this 
+ */
+router.use('/:tourId/reviews', reviewRouter);
 
 /** 
   for top-5-cheap
@@ -29,18 +51,6 @@ router
     authController.protect,
     authController.restrictTo('admin', 'lead-guide'), //only admin and lead-guide can delete tour
     tourController.deleteTour
-  );
-/**Nested router */
-// Post /tour/234afe/reviews
-// Get /tour/234afe/reviews
-// Get /tour/234afe/reviews/454ttf
-
-router
-  .route('/:tourId/reviews')
-  .post(
-    authController.protect,
-    authController.restrictTo('user'),
-    reviewController.createReview
   );
 
 module.exports = router;

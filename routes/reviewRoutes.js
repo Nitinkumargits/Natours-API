@@ -2,6 +2,10 @@ const express = require('express');
 const reviewController = require('./../controllers/reviewController');
 const authController = require('./../controllers/authController');
 
+/**
+ - mergeParams: true > we need this bcz bydefault each router only have access to the parameter of their specific  routes 
+ - we wnt to access to eg tourId-parameter which is present at other router we need to mergerParams  
+ */
 const router = express.Router({ mergeParams: true });
 
 // router.use(authController.protect);
