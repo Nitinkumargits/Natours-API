@@ -15,20 +15,26 @@ router.post('/signup', authContoller.signup);
 router.post('/login', authContoller.login);
 //--------------------------------------------------------------
 /**Password Reset routes */
-
 router.post('/forgotPassword', authContoller.forgotPassword); //will only receive the email address
 router.patch('/resetPassword/:token', authContoller.resetPassword); // will receive the token as well as new Password
+
 //--------------------------------------------------------------
-router.patch(
-  '/updateMyPassword',
-  authContoller.protect,
-  authContoller.updatePassword
-);
+//--------------------------------------------------------------
+//protect all routes after this middleware
+//middleware that  add to all the routes that come after this ....
+router.use(authContoller.protect);
+//--------------------------------------------------------------
+router.patch('/updateMyPassword', authContoller.updatePassword);
+//--------------------------------------------------------------
+router.get('/me', userController.getMe, userController.getUser);
 //--------------------------------------------------------------
 //it is a protected route only the currently authenticated user can update data of the current-user,it is secure bcz the id of the user thats is gonna be updated come form the req.user(which was set by protect-middleWare ,which in turn  got the id from the jsonWebToken , Since no one change the in the JWT without knowing the secret ,then ID is safe )
-router.patch('/updateMe', authContoller.protect, userController.updateMe);
+router.patch('/updateMe', userController.updateMe);
 //--------------------------------------------------------------
-router.delete('/deleteMe', authContoller.protect, userController.deleteMe);
+router.delete('/deleteMe', userController.deleteMe);
+//--------------------------------------------------------------
+//after this route all the routes are protected and restricted to only admin
+router.use(authContoller.restrictTo('admin'));
 //--------------------------------------------------------------
 router
   .route('/')

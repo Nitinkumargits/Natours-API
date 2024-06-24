@@ -15,12 +15,17 @@ const userSchema = new mongoose.Schema(
     },
     email: {
       type: String,
+      required: [true, 'Please provide your email'],
+      unique: true,
       lowercase: true,
-      //   required: [true, "Email can't be blank"],
-      /**from validator-package */
-      validate: [validator.isEmail, 'Please provide an vaild email'],
-      trim: true,
-      unique: true
+      validate: [validator.isEmail, 'Please provide a valid email']
+      // type: String,
+      // lowercase: true,
+      // //   required: [true, "Email can't be blank"],
+      // /**from validator-package */
+      // validate: [validator.isEmail, 'Please provide an vaild email'],
+      // trim: true,
+      // unique: true
     },
     /**
      for uplode a photo,but its not require,Photo is mostly optional in web app, 

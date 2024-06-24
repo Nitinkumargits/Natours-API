@@ -4,6 +4,7 @@
 const User = require('./../model/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
+const factory = require('./handlerFactory');
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -13,18 +14,22 @@ const filterObj = (obj, ...allowedFields) => {
   return newObj;
 };
 
-exports.getAllUsers = catchAsync(async (req, res, next) => {
-  const user = await User.find();
-  //Send Response   back all the User to client
-  res.status(200).json({
-    status: 'success',
-    results: user.length,
-    // data-property : so called envelope for our data
-    data: {
-      user
-    }
-  });
-});
+exports.getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+};
+// exports.getAllUsers = catchAsync(async (req, res, next) => {
+//   const user = await User.find();
+//   //Send Response   back all the User to client
+//   res.status(200).json({
+//     status: 'success',
+//     results: user.length,
+//     // data-property : so called envelope for our data
+//     data: {
+//       user
+//     }
+//   });
+// });
 /**
   Allow the currenlty logged-in user to mainpulate his user data
   updateMe -> updating the current authenticated  user.
@@ -51,7 +56,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   const filteredBody = filterObj(req.body, 'name', 'email');
   //3> Update user document
   /**
-   save method is not the correct option,instead we can do now use findByIdAndUpdate (we could not use this before bcz create and save ),but now we not dealing with password but only with the non-sensitive data like name and email 
+   save method is not the correct option,instead we can do now use findByIdAndUpdate (we could not use this before bcz create and save ),but now we not dealing with password but only with the non-sensitive data like name and email
 
    */
   const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
@@ -73,30 +78,17 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 
   res.status(204).json({ status: 'success', data: null });
 });
-exports.getUser = (req, res) => {
-  res.status(500).json({
-    status: 'ERROR...',
-    message: 'Internal Server error ☠☠☠☠'
-  });
-};
+exports.getUser = factory.getOne(User);
+
 exports.createUser = (req, res) => {
   res.status(500).json({
     status: 'ERROR...',
-    message: 'Internal Server error ☠☠☠☠'
+    message: 'This route is not defined! Please use SignUp instead '
   });
 };
 /**
  updateUser for administration  to update all the user data
  */
-exports.updateUser = (req, res) => {
-  res.status(500).json({
-    status: 'ERROR...',
-    message: 'Internal Server error ☠☠☠☠'
-  });
-};
-exports.deleteUser = (req, res) => {
-  res.status(500).json({
-    status: 'ERROR...',
-    message: 'Internal Server error ☠☠☠☠'
-  });
-};
+exports.getAllUsers = factory.getAll(User);
+exports.updateUser = factory.updateOne(User);
+exports.deleteUser = factory.deleteOne(User);

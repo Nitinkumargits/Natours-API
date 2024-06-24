@@ -4,6 +4,7 @@ const Tour = require('./../model/tourModel');
 const APIFeatures = require('./../utils/APIFeatures');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
+const factory = require('./handlerFactory');
 
 //middleware('/top-5-cheap' route)
 exports.aliasTopTours = (req, res, next) => {
@@ -13,113 +14,116 @@ exports.aliasTopTours = (req, res, next) => {
   req.query.fields = 'name,price,difficulty,ratingsAverage,summary';
   next();
 };
-exports.getAllTours = catchAsync(async (req, res, next) => {
-  //---------------excute the query------------------------------------------
+// exports.getAllTours = catchAsync(async (req, res, next) => {
+//   //---------------excute the query------------------------------------------
 
-  //new APIFeatures(query-Object,queryString comming from exprsess)
-  const features = new APIFeatures(Tour.find(), req.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
-  const tours = await features.query;
+//   //new APIFeatures(query-Object,queryString comming from exprsess)
+//   const features = new APIFeatures(Tour.find(), req.query)
+//     .filter()
+//     .sort()
+//     .limitFields()
+//     .paginate();
+//   const tours = await features.query;
 
-  //Send Response   back all the tours to client
-  res.status(200).json({
-    status: 'success',
-    results: tours.length,
-    // data-property : so called envelope for our data
-    data: {
-      // tours:tours
-      tours
-    }
-  });
-});
+//   //Send Response   back all the tours to client
+//   res.status(200).json({
+//     status: 'success',
+//     results: tours.length,
+//     // data-property : so called envelope for our data
+//     data: {
+//       // tours:tours
+//       tours
+//     }
+//   });
+// });
+exports.getAllTours = factory.getAll(Tour);
+// exports.getTour = catchAsync(async (req, res, next) => {
+//   /**
+//       findById() -> same as Tour.findOne({ _id:req.params.id })
+//   */
+//   /**
+//     - // name of the field that we want to populate i.e field calld guides in our model , with populate we actully wnt to fill the data
+//     -this populate fuction is absolutely fundamental tool for working with data in mongoose and when there are realtionship with data
+//     -behind the scenes , using populate will still actually create a new query ,it may affect your performace
+//   */
+//   const tour = await Tour.findById(req.params.id).populate('reviews');
 
-exports.getTour = catchAsync(async (req, res, next) => {
-  /**
-      findById() -> same as Tour.findOne({ _id:req.params.id })
-  */
-  /**
-    - // name of the field that we want to populate i.e field calld guides in our model , with populate we actully wnt to fill the data
-    -this populate fuction is absolutely fundamental tool for working with data in mongoose and when there are realtionship with data
-    -behind the scenes , using populate will still actually create a new query ,it may affect your performace 
-  */
-  const tour = await Tour.findById(req.params.id).populate('reviews');
+//   /**Handle by global Error Handle  */
+//   if (!tour) {
+//     return next(new AppError('No Tour find with the ID', 404));
+//   }
 
-  /**Handle by global Error Handle  */
-  if (!tour) {
-    return next(new AppError('No Tour find with the ID', 404));
-  }
-
-  res.status(200).json({
-    status: 'SUCCESS',
-    data: {
-      //data we want to send
-      tours: tour
-    }
-  });
-});
-
+//   res.status(200).json({
+//     status: 'SUCCESS',
+//     data: {
+//       //data we want to send
+//       tours: tour
+//     }
+//   });
+// });
+exports.getTour = factory.getOne(Tour, { path: 'reviews' });
 /**
  In order to rid of try/catch we simply wrapp our async funtion inside of catchAsync() this func will return new anonymous function(**)
  */
-exports.createTour = catchAsync(async (req, res, next) => {
-  /**    
-   *  //create a new Tour based on the data that come in from the body
+// exports.createTour = catchAsync(async (req, res, next) => {
+//   /**
+//    *  //create a new Tour based on the data that come in from the body
 
-    //how we created Document for new tour
-    // const newTour = new Tour({});
-    // newTour.save();//we call the method on new Document(newTour)
+//     //how we created Document for new tour
+//     // const newTour = new Tour({});
+//     // newTour.save();//we call the method on new Document(newTour)
 
-    //better way to create document
-    //we call the create() method directly on the Tour model itself,create() return a promise
-   */
+//     //better way to create document
+//     //we call the create() method directly on the Tour model itself,create() return a promise
+//    */
 
-  const newTour = await Tour.create(req.body);
+//   const newTour = await Tour.create(req.body);
 
-  res.status(200).json({
-    status: 'SUCCESS',
-    body: {
-      tour: newTour
-    }
-  });
-});
+//   res.status(200).json({
+//     status: 'SUCCESS',
+//     body: {
+//       tour: newTour
+//     }
+//   });
+// });
 
-exports.updateTour = catchAsync(async (req, res, next) => {
-  /**
-     - query for the document that we want to update based on id 
-     - Tour.findByIdAndUpdate(id,Data we want to change,pass some options {new:true}->new update document will return )
-    */
-  const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true
-  });
-  /**Handle by global Error Handle  */
-  if (!tour) {
-    return next(new AppError('No Tour find with the ID', 404));
-  }
+exports.createTour = factory.createOne(Tour);
+exports.updateTour = factory.updateOne(Tour);
+// exports.updateTour = catchAsync(async (req, res, next) => {
+//   /**
+//      - query for the document that we want to update based on id
+//      - Tour.findByIdAndUpdate(id,Data we want to change,pass some options {new:true}->new update document will return )
+//     */
+//   const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+//     new: true,
+//     runValidators: true
+//   });
+//   /**Handle by global Error Handle  */
+//   if (!tour) {
+//     return next(new AppError('No Tour find with the ID', 404));
+//   }
 
-  res.status(200).json({
-    status: 'Succes',
-    data: {
-      // tour: tour
-      tour
-    }
-  });
-});
+//   res.status(200).json({
+//     status: 'Succes',
+//     data: {
+//       // tour: tour
+//       tour
+//     }
+//   });
+// });
 
-exports.deleteTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findByIdAndDelete(req.params.id);
-  /**Handle by global Error Handle  */
-  if (!tour) {
-    return next(new AppError('No Tour find with the ID', 404));
-  }
-  res.status(204).json({
-    status: 'Succes',
-    data: null //resource we deleted is no longer exist
-  });
-});
+exports.deleteTour = factory.deleteOne(Tour);
+// exports.deleteTour = catchAsync(async (req, res, next) => {
+//   const tour = await Tour.findByIdAndDelete(req.params.id);
+//   /**Handle by global Error Handle  */
+//   if (!tour) {
+//     return next(new AppError('No Tour find with the ID', 404));
+//   }
+//   res.status(204).json({
+//     status: 'Succes',
+//     data: null //resource we deleted is no longer exist
+//   });
+// });
 
 //Aggregation pipeline
 
