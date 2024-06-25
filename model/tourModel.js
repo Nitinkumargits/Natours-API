@@ -171,6 +171,7 @@ const toursSchema = new mongoose.Schema(
  */
 toursSchema.index({ price: 1, ratingsAverage: -1 });
 toursSchema.index({ slug: 1 });
+toursSchema.index({ startLocation: '2dsphere' });
 
 //Virtual properties
 /** 
@@ -270,41 +271,41 @@ toursSchema.post(/^find/, function(docs, next) {
  -
  */
 
-toursSchema.pre('aggregate', function(next) {
-  console.log(this); //point to current aggregation
-  console.log(this.pipeline());
-  /**
-       Aggregate {
-      _pipeline: [
-        { '$match': [Object] },
-        { '$group': [Object] },
-        { '$sort': [Object] }
-      ],
-      _model: Model { Tour },
-      options: {}
-    }
-    [
-      { '$match': { ratingsAverage: [Object] } },
-      {
-        '$group': {
-          _id: [Object],
-          numTours: [Object],
-          numRatings: [Object],
-          avgRating: [Object],
-          avgPrice: [Object],
-          minPrice: [Object],
-          maxPrice: [Object]
-        }
-      },
-      { '$sort': { avgPrice: 1 } }        
-    ]
-   */
+// toursSchema.pre('aggregate', function(next) {
+//   console.log(this); //point to current aggregation
+//   console.log(this.pipeline());
+//   /**
+//        Aggregate {
+//       _pipeline: [
+//         { '$match': [Object] },
+//         { '$group': [Object] },
+//         { '$sort': [Object] }
+//       ],
+//       _model: Model { Tour },
+//       options: {}
+//     }
+//     [
+//       { '$match': { ratingsAverage: [Object] } },
+//       {
+//         '$group': {
+//           _id: [Object],
+//           numTours: [Object],
+//           numRatings: [Object],
+//           avgRating: [Object],
+//           avgPrice: [Object],
+//           minPrice: [Object],
+//           maxPrice: [Object]
+//         }
+//       },
+//       { '$sort': { avgPrice: 1 } }
+//     ]
+//    */
 
-  //In order to filter out the secret tour all we have to do is to add another match stages write at the beggin of pipeline array
-  //unshift - to add ele at beggin of the array
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
-  next();
-});
+//   //In order to filter out the secret tour all we have to do is to add another match stages write at the beggin of pipeline array
+//   //unshift - to add ele at beggin of the array
+//   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+//   next();
+// });
 /** mongoDB Model */
 const Tour = new mongoose.model('Tour', toursSchema);
 
