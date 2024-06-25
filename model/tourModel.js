@@ -162,6 +162,14 @@ const toursSchema = new mongoose.Schema(
   }
 );
 
+/**Indexing */
+/**
+  1= sorting price-index acending order 
+  -1= decending order
+ */
+toursSchema.index({ price: 1, ratingsAverage: -1 });
+toursSchema.index({ slug: 1 });
+
 //Virtual properties
 /** 
   .virtual("name of the virtual properties")
