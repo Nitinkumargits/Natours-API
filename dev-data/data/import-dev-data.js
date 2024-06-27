@@ -28,19 +28,19 @@ mongoose
 //Read JSON file
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/tours.json`, 'utf-8'));
 
-const reviews = JSON.parse(
-  fs.readFileSync(`${__dirname}/reviews.json`, 'utf-8')
-);
+// const reviews = JSON.parse(
+//   fs.readFileSync(`${__dirname}/reviews.json`, 'utf-8')
+// );
 
-const users = JSON.parse(fs.readFileSync(`${__dirname}/users.json`, 'utf-8'));
+// const users = JSON.parse(fs.readFileSync(`${__dirname}/users.json`, 'utf-8'));
 
 //import data into DataBase
 const importData = async () => {
   try {
     //Tour.create()-> previouly we pass object back then, create method can also accept an array of objects it will simply create new document for each of the object in the array
     await Tour.create(tours);
-    await User.create(users);
-    await Review.create(reviews);
+    // await User.create(users);
+    // await Review.create(reviews);
     console.log('Data is successfully loaded');
   } catch (error) {
     console.log(error);
@@ -52,8 +52,8 @@ const importData = async () => {
 const deleteData = async () => {
   try {
     await Tour.deleteMany();
-    await User.deleteMany();
-    await Review.deleteMany();
+    // await User.deleteMany();
+    // await Review.deleteMany();
     console.log('Data is successfully Deleted');
   } catch (error) {
     // console.log(error);

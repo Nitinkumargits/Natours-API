@@ -77,7 +77,7 @@ const toursSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
-    imagecover: {
+    imageCover: {
       type: String, //name of the image, which we able to read from the file system, reference will be stored in DB
       //We leave the image somewhere in the file system and put the name of image of itself in the DB as field
       require: [true, 'A tour must have the cover image']
@@ -119,7 +119,7 @@ const toursSchema = new mongoose.Schema(
      - this is how you create embedded document , always need to use the array , by specifying an array of objects,this will create brand new documents inside of parent document which is 
      in this case tour
      */
-    location: [
+    locations: [
       {
         type: {
           type: String,

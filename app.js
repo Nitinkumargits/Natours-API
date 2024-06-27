@@ -1,6 +1,7 @@
 /* eslint-disable import/newline-after-import */
 /* eslint-disable import/order */
 /* eslint-disable import/no-extraneous-dependencies */
+const path = require('path');
 const express = require('express');
 const morgon = require('morgan');
 const AppError = require('./utils/appError');
@@ -11,6 +12,8 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const hpp = require('hpp');
+const viewRouter = require('./routes/viewRoutes');
+
 const app = express();
 
 const tourRouter = require('./routes/tourRoutes');
@@ -20,6 +23,14 @@ const reviewRouter = require('./routes/reviewRoutes');
 /**----------Global-middleWare-------------------------*/
 /**Set security HTTP-Header */
 app.use(helmet());
+
+/**---------- for static file like (html,css,img) -------------------------*/
+// app.use(express.static(`${__dirname}/public`));
+app.use(express.static(path.join(__dirname, 'public')));
+
+/**---------- Setting PUG -------------------------*/
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
 
 /**Develpment logging */
 if (process.env.NODE_ENV === 'development') {
@@ -56,9 +67,6 @@ app.use(
   })
 );
 
-//for static file like (html,css,img)
-app.use(express.static(`${__dirname}/public`));
-
 //Test midddleWare
 app.use((req, res, next) => {
   req.reqestTime = new Date().toISOString();
@@ -73,6 +81,7 @@ app.use((req, res, next) => {
 /**
   //Mounting the router(mounting new-router(tourRouter middlerware,userRouter middlerware)  to route these two router will be a middlerware that's why we put inside app.use() in order to mount them)
  */
+app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
