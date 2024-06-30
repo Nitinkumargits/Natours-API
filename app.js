@@ -13,6 +13,7 @@ const xss = require('xss-clean');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const hpp = require('hpp');
 const viewRouter = require('./routes/viewRoutes');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 
@@ -22,7 +23,11 @@ const reviewRouter = require('./routes/reviewRoutes');
 
 /**----------Global-middleWare-------------------------*/
 /**Set security HTTP-Header */
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: false
+  })
+);
 
 /**---------- for static file like (html,css,img) -------------------------*/
 // app.use(express.static(`${__dirname}/public`));
@@ -48,6 +53,8 @@ app.use('/api', limiter);
 
 //Body parser, reading data form the body into req.body
 app.use(express.json({ limit: '10kb' }));
+//cookie-parser
+app.use(cookieParser());
 
 // Data sanitization against NoSQL query injection(remove any mongo-operator(like $))
 app.use(mongoSanitize());
@@ -72,7 +79,7 @@ app.use((req, res, next) => {
   req.reqestTime = new Date().toISOString();
   /**protected routes */
   // console.log('req-header : ', req.headers); //the one client snd along with there request
-
+  console.log('cookies :', req.cookies);
   next();
 });
 

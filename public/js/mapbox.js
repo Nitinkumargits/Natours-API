@@ -1,9 +1,3 @@
-/**
- Map (mapbox-library) for displaying map , that library actually run in fontend 
- -js for client side and then integrate that into our template 
- -js file that we integrate into our html whcih will run on client side 
- console.log("hello from the client side")
- */
 /* eslint-disable */
 export const displayMap = locations => {
   mapboxgl.accessToken =

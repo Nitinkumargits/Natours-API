@@ -13,6 +13,8 @@ router.post('/signup', authContoller.signup);
 /**login user */
 // POST-req we want to send login credentials in body
 router.post('/login', authContoller.login);
+/**logout */
+router.get('/logout', authContoller.logout);
 //--------------------------------------------------------------
 /**Password Reset routes */
 router.post('/forgotPassword', authContoller.forgotPassword); //will only receive the email address

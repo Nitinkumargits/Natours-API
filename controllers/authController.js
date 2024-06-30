@@ -23,6 +23,14 @@ const createSendToken = (user, statusCode, res) => {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
+    /**
+     this means we can't manipulate the cookie inn the browser in any way not even delete it , if we wnat to use this secure way of storing cookie , then how we gona loggout user on  our website 
+     bz usually with JWT-authentication we just delete the cookie or token from the local storage (not possible using this wayy )
+     create a simple logout route that simply snt back a new cookie with exact same name but without the token 
+     that will override the current cookie have in the browser with that has the same name but no token
+     when that cookie snt along with the next request then will not be able to identify the user as being logged in then
+     this will effectively log out user ,we gonna gift this cookie a very short expiration time 
+     */
     httpOnly: true
   };
   if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
@@ -57,19 +65,17 @@ exports.signup = catchAsync(async (req, res, next) => {
   //   expiresIn: process.env.JWT_EXPIRES_IN
   // });
 
-  createSendToken(newUser, 201, res);
+  // createSendToken(newUser, 201, res);
 
-  /**
-     // const token = signToken(newUser._id);
+  const token = signToken(newUser._id);
 
-      // res.status(201).json({
-      //   status: 'Success',
-      //   token,
-      //   data: {
-      //     user: newUser
-      //   }
-      // });
-   */
+  res.status(201).json({
+    status: 'success',
+    token,
+    data: {
+      user: newUser
+    }
+  });
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -82,7 +88,7 @@ exports.login = catchAsync(async (req, res, next) => {
   /**
    //field and variable are same we can do this like  User.findOne({email}), this will not contain the password, but we do need the password(bcz we use password{select:false }in userModel) to check if itis correct,so we need to explicitly .select('+password') field that we needed like this it will back in the output
    */
-  const user = await User.findOne({ email: email }).select('+password'); //user Document
+  const user = await User.findOne({ email }).select('+password'); //user Document
   /**using instance method(available on all the user-document) */
   // const correct = await user.correctPassword(password, user.password); //give true/false
   if (!user || !(await user.correctPassword(password, user.password))) {
@@ -106,9 +112,9 @@ exports.login = catchAsync(async (req, res, next) => {
    bcrypt encrypt(pass1234) this and then compare it - create that function in userModel bcz it realted to data itself
    */
   // 3> if everything okay send token(JWT) to client
-  createSendToken(user, 200, res);
   // const token = signToken(user._id);
-  // res.status(200).json({ status: 'Success', token });
+  // res.status(200).json({ status: 'Success', token, user });
+  createSendToken(user, 200, res);
 });
 
 exports.logout = (req, res) => {
@@ -125,7 +131,6 @@ exports.protect = catchAsync(async (req, res, next) => {
   /**
    Common practices is to send a token using an http-header with the request
    */
-
   let token;
   if (
     req.headers.authorization &&
@@ -180,6 +185,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   res.locals.user = currentUser;
   next();
 });
+
 // Only for rendered pages, no errors!
 exports.isLoggedIn = async (req, res, next) => {
   if (req.cookies.jwt) {
@@ -268,7 +274,6 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save({ validateBeforeSave: false });
-    console.log(err);
     return next(
       new AppError(
         'There was an error sending the email. Try again later!',
