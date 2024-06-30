@@ -2,94 +2,114 @@
  handler are also called them  controller in context of MVC
  */
 
-const AppError = require('../utils/appError');
+const AppError = require('./../utils/appError');
 
-/**
- * handleCastErrorDB
- {
-    "status": "error",
-    "error": {
-        "stringValue": "\"wwwwww\"",
-        "valueType": "string",
-        "kind": "ObjectId",
-        "value": "wwwwww",
-        "path": "_id",
-        "reason": {},
-        "name": "CastError",
-        "message": "Cast to ObjectId failed for value \"wwwwww\" (type string) at path \"_id\" for model \"Tour\""
-    },
-    "message": "Cast to ObjectId failed for value \"wwwwww\" (type string) at path \"_id\" for model \"Tour\"",
-    "stack": "CastError: Cast to ObjectId failed for value \"wwwwww\" (type string) at path \"_id\" for model \"Tour\"\n    at model.Query.exec (D:\\2.1. Node\\NODE-APP\\Natours-API\\node_modules\\mongoose\\lib\\query.js:4498:21)\n    at Query.then (D:\\2.1. Node\\NODE-APP\\Natours-API\\node_modules\\mongoose\\lib\\query.js:4592:15)"
-}
- */
 const handleCastErrorDB = err => {
-  const message = `Invalid ${err.path}: ${err.value}`;
-  return new AppError(message, 400); //400-bad request
+  const message = `Invalid ${err.path}: ${err.value}.`;
+  return new AppError(message, 400);
 };
 
-const handleDublicateDB = err => {
-  const value = err.errmsg.match(/(["'])(?:(?=(\\?))\2.)*?\1/)[0];
-  const message = `Duplicate field value: ${value},Please use another value`;
+const handleDuplicateFieldsDB = err => {
+  const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
+  console.log(value);
+
+  const message = `Duplicate field value: ${value}. Please use another value!`;
   return new AppError(message, 400);
 };
 
 const handleValidationErrorDB = err => {
-  const error = Object.values(err.errors).map(el => el.message);
-  const message = `Invalid input data ${error.join('. ')}`;
+  const errors = Object.values(err.errors).map(el => el.message);
+
+  const message = `Invalid input data. ${errors.join('. ')}`;
   return new AppError(message, 400);
 };
 
-/** work only on production */
 const handleJWTError = () =>
-  new AppError('Invaild token,Please log-in again', 401); //401 unauthorize
+  new AppError('Invalid token. Please log in again!', 401);
 
-const handleJWTExprireError = () =>
-  new AppError('Your Token has expired, Please login again!', 401);
+const handleJWTExpiredError = () =>
+  new AppError('Your token has expired! Please log in again.', 401);
 
-const sendErrorDev = (err, res) => {
-  res.status(err.statusCode).json({
-    status: err.status,
-    error: err,
-    message: err.message,
-    stack: err.stack
+const sendErrorDev = (err, req, res) => {
+  // A) API
+  if (req.originalUrl.startsWith('/api')) {
+    return res.status(err.statusCode).json({
+      status: err.status,
+      error: err,
+      message: err.message,
+      stack: err.stack
+    });
+  }
+
+  // B) RENDERED WEBSITE
+  console.error('ERROR 💥', err);
+  return res.status(err.statusCode).render('error', {
+    title: 'Something went wrong!',
+    msg: err.message
   });
 };
 
-const sendErrorProd = (err, res) => {
-  //Operational,trustederror: send  message to client
-  if (err.isOperational) {
-    res.status(err.statusCode).json({
-      status: err.status,
-      message: err.message
-    });
-  } else {
-    //Programming and some other unknow error:don't want to leak detail to client
-
-    //1>log error
-    console.error('Error 👻👻👻', err);
-    //2>send generic message
-    res.status(500).json({
-      status: 'fail',
-      message: 'Something went very wrong'
+const sendErrorProd = (err, req, res) => {
+  // A) API
+  if (req.originalUrl.startsWith('/api')) {
+    // A) Operational, trusted error: send message to client
+    if (err.isOperational) {
+      return res.status(err.statusCode).json({
+        status: err.status,
+        message: err.message
+      });
+    }
+    // B) Programming or other unknown error: don't leak error details
+    // 1) Log error
+    console.error('ERROR 💥', err);
+    // 2) Send generic message
+    return res.status(500).json({
+      status: 'error',
+      message: 'Something went very wrong!'
     });
   }
+
+  // B) RENDERED WEBSITE
+  // A) Operational, trusted error: send message to client
+  if (err.isOperational) {
+    console.log(err);
+    return res.status(err.statusCode).render('error', {
+      title: 'Something went wrong!',
+      msg: err.message
+    });
+  }
+  // B) Programming or other unknown error: don't leak error details
+  // 1) Log error
+  console.error('ERROR 💥', err);
+  // 2) Send generic message
+  return res.status(err.statusCode).render('error', {
+    title: 'Something went wrong!',
+    msg: 'Please try again later.'
+  });
 };
+
 module.exports = (err, req, res, next) => {
-  err.statusCode = err.statusCode || 500; //500--internal server error
+  // console.log(err.stack);
+
+  err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 
   if (process.env.NODE_ENV === 'development') {
-    sendErrorDev(err, res);
+    sendErrorDev(err, req, res);
   } else if (process.env.NODE_ENV === 'production') {
     /**
      we gonna pass the error that mongoose created into this handleCastErrorDB() func,this will return a new error created with our AppError class,that error than will marked as operational error,all the AppError have the isOperation=true automatically
      */
     let error = { ...err };
+    error.message = err.message;
+
     if (error.name === 'CastError') error = handleCastErrorDB(error);
-    if (error.code === '11000') error = handleDublicateDB(error);
-    if (error.name === 'ValidatorError') error = handleValidationErrorDB(error);
+    if (error.code === 11000) error = handleDuplicateFieldsDB(error);
+    if (error.name === 'ValidationError')
+      error = handleValidationErrorDB(error);
     if (error.name === 'JsonWebTokenError') error = handleJWTError();
-    if (error.name === 'TokenExpiredError') error = handleJWTExprireError();
-    sendErrorProd(error, res);
+    if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
+
+    sendErrorProd(error, req, res);
   }
 };
