@@ -102,15 +102,6 @@ app.use(
   })
 );
 
-//Test midddleWare
-app.use((req, res, next) => {
-  req.reqestTime = new Date().toISOString();
-  /**protected routes */
-  // console.log('req-header : ', req.headers); //the one client snd along with there request
-  console.log('cookies :', req.cookies);
-  next();
-});
-
 //--------------------------------------------
 /**Mounting the router */
 /**
@@ -121,6 +112,15 @@ app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
 //----------------------------------------------
+//Test midddleWare
+app.use((req, res, next) => {
+  req.reqestTime = new Date().toISOString();
+  /**protected routes */
+  // console.log('req-header : ', req.headers); //the one client snd along with there request
+  // console.log('cookies :', req.cookies);
+  console.log('req.user :', req.user);
+  next();
+});
 /** Handling Unhandle Route */
 //reach here means neither teh tourRouter/UserRouter able to catch it
 /** 

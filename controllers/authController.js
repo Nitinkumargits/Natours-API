@@ -88,7 +88,8 @@ exports.login = catchAsync(async (req, res, next) => {
   /**
    //field and variable are same we can do this like  User.findOne({email}), this will not contain the password, but we do need the password(bcz we use password{select:false }in userModel) to check if itis correct,so we need to explicitly .select('+password') field that we needed like this it will back in the output
    */
-  const user = await User.findOne({ email }).select('+password'); //user Document
+  const user = await User.findOne({ email }).select('+password');
+  //user Document
   /**using instance method(available on all the user-document) */
   // const correct = await user.correctPassword(password, user.password); //give true/false
   if (!user || !(await user.correctPassword(password, user.password))) {
@@ -196,28 +197,32 @@ exports.isLoggedIn = async (req, res, next) => {
         req.cookies.jwt,
         process.env.JWT_SECRET
       );
-
-      // 2) Check if user still exists
       const currentUser = await User.findById(decoded.id);
       if (!currentUser) {
-        return next();
+        return next(
+          new AppError(
+            'The user belonging to this token does no longer exist.',
+            401
+          )
+        );
       }
 
-      // 3) Check if user changed password after the token was issued
-      if (currentUser.changedPasswordAfter(decoded.iat)) {
+      // 4> check if user change password if after the JWT/token was issued
+      if (currentUser.changePasswordAfter(decoded.iat)) {
         return next();
       }
-
-      // THERE IS A LOGGED IN USER
+      //if no problem in above step then next will be called,which will then get access to the route that we protected e.g- getAllToursHandler
+      //Grant access to protected route
+      req.user = currentUser;
       res.locals.user = currentUser;
-
-      return next();
+      console.log(res.locals.user);
     } catch (err) {
       return next();
     }
   }
   next();
 };
+
 /**
  usually we cannot pass argument to middleware function, so we create a wrapper function,which will then return the middleware function that we actually wnt to create
 
