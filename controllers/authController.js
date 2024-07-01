@@ -89,7 +89,6 @@ exports.login = catchAsync(async (req, res, next) => {
    //field and variable are same we can do this like  User.findOne({email}), this will not contain the password, but we do need the password(bcz we use password{select:false }in userModel) to check if itis correct,so we need to explicitly .select('+password') field that we needed like this it will back in the output
    */
   const user = await User.findOne({ email }).select('+password');
-  console.log(user); //till here okay
   //user Document
   /**using instance method(available on all the user-document) */
   // const correct = await user.correctPassword(password, user.password); //give true/false
