@@ -12421,23 +12421,24 @@ var login = exports.login = /*#__PURE__*/function () {
           });
         case 3:
           res = _context.sent;
+          console.log(res);
           if (res.data.status === 'success') {
             (0, _alerts.showAlert)('success', 'Logged in successfully!');
             window.setTimeout(function () {
               location.assign('/');
             }, 1500);
           }
-          _context.next = 10;
+          _context.next = 11;
           break;
-        case 7:
-          _context.prev = 7;
+        case 8:
+          _context.prev = 8;
           _context.t0 = _context["catch"](0);
           (0, _alerts.showAlert)('error', _context.t0.response.data.message);
-        case 10:
+        case 11:
         case "end":
           return _context.stop();
       }
-    }, _callee, null, [[0, 7]]);
+    }, _callee, null, [[0, 8]]);
   }));
   return function login(_x, _x2) {
     return _ref.apply(this, arguments);
@@ -12807,7 +12808,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55670" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50556" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

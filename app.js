@@ -66,24 +66,6 @@ app.use(express.json({ limit: '10kb' }));
 //cookie-parser
 app.use(cookieParser());
 
-// const allowedOrigins = ['http://localhost:3000'];
-
-// const corsOptions = {
-//   origin: function(origin, callback) {
-//     if (allowedOrigins.indexOf(origin) !== -1) {
-//       callback(null, true);
-//     } else {
-//       const msg =
-//         'The CORS policy for this site does not ' +
-//         'allow access from the specified Origin.';
-//       callback(new Error(msg), false);
-//     }
-//   },
-//   optionsSuccessStatus: 200,
-//   credentials: true
-// };
-// app.use(cors(corsOptions));
-
 // Data sanitization against NoSQL query injection(remove any mongo-operator(like $))
 app.use(mongoSanitize());
 // Data sanitization against XSS(clean malicious html-code)
@@ -118,7 +100,7 @@ app.use((req, res, next) => {
   /**protected routes */
   // console.log('req-header : ', req.headers); //the one client snd along with there request
   // console.log('cookies :', req.cookies);
-  console.log('req.user :', req.user);
+  // console.log('req.user :', req.user);
   next();
 });
 /** Handling Unhandle Route */

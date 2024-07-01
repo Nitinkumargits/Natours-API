@@ -132,6 +132,8 @@ userSchema.methods.correctPassword = async function(
   candidatePassword,
   userPassword
 ) {
+  // candidatePassword--> input password
+  // userPassword--> hashed password
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
