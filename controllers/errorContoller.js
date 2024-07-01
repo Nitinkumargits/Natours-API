@@ -40,7 +40,6 @@ const sendErrorDev = (err, req, res) => {
       stack: err.stack
     });
   }
-
   // B) RENDERED WEBSITE
   console.error('ERROR 💥', err);
   return res.status(err.statusCode).render('error', {
