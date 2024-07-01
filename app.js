@@ -20,6 +20,7 @@ const app = express();
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+// const cors = require('cors');
 
 /**----------Global-middleWare-------------------------*/
 /**Set security HTTP-Header */
@@ -64,6 +65,24 @@ app.use('/api', limiter);
 app.use(express.json({ limit: '10kb' }));
 //cookie-parser
 app.use(cookieParser());
+
+// const allowedOrigins = ['http://localhost:3000'];
+
+// const corsOptions = {
+//   origin: function(origin, callback) {
+//     if (allowedOrigins.indexOf(origin) !== -1) {
+//       callback(null, true);
+//     } else {
+//       const msg =
+//         'The CORS policy for this site does not ' +
+//         'allow access from the specified Origin.';
+//       callback(new Error(msg), false);
+//     }
+//   },
+//   optionsSuccessStatus: 200,
+//   credentials: true
+// };
+// app.use(cors(corsOptions));
 
 // Data sanitization against NoSQL query injection(remove any mongo-operator(like $))
 app.use(mongoSanitize());

@@ -183,6 +183,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   //Grant access to protected route
   req.user = currentUser;
   res.locals.user = currentUser;
+
   next();
 });
 
@@ -209,6 +210,7 @@ exports.isLoggedIn = async (req, res, next) => {
 
       // THERE IS A LOGGED IN USER
       res.locals.user = currentUser;
+
       return next();
     } catch (err) {
       return next();

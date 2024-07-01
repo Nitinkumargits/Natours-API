@@ -6,10 +6,11 @@ import { updateSettings } from './updateSettings';
 
 // DOM ELEMENTS
 const mapBox = document.getElementById('map');
-const loginForm = document.querySelector('.form--login');
+const loginForm = document.querySelector('.form');
 const logOutBtn = document.querySelector('.nav__el--logout');
 const userDataForm = document.querySelector('.form-user-data');
 const userPasswordForm = document.querySelector('.form-user-password');
+const signupForm = document.querySelector('.signup-form');
 
 // DELEGATION
 if (mapBox) {
@@ -17,13 +18,42 @@ if (mapBox) {
   displayMap(locations);
 }
 
-if (loginForm)
-  loginForm.addEventListener('submit', e => {
+// SIGNUP NEWUSER USING AXION(API) //////////////////////////////////////////////////////////////////////
+if (signupForm) {
+  signupForm.addEventListener('submit', async e => {
     e.preventDefault();
+
+    // Change button text while Signing up a new user
+    document.querySelector('.btn--signup').innerText = 'Signing...';
+
+    const name = document.getElementById('name').value;
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    login(email, password);
+    const passwordConfirm = document.getElementById('passwordconfirm').value;
+    await signup(name, email, password, passwordConfirm);
+
+    // Change button text and clear input-fields after Signing up new user
+    document.querySelector('.btn--signup').innerText = 'Signup';
+    signupForm.reset();
   });
+}
+
+if (loginForm) {
+  loginForm.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    // Change button text while login
+    document.querySelector('.btn--login').innerText = 'Logging...';
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    await login(email, password);
+
+    // Change button text after login
+    document.querySelector('.btn--login').innerText = 'Login';
+  });
+}
 
 if (logOutBtn) logOutBtn.addEventListener('click', logout);
 
