@@ -1,5 +1,4 @@
 /* eslint-disable */
-/**this is ES6-module syntax not the common-js module(node) */
 import axios from 'axios';
 import { showAlert } from './alerts';
 

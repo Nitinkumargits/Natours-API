@@ -23,9 +23,18 @@ const reviewRouter = require('./routes/reviewRoutes');
 
 /**----------Global-middleWare-------------------------*/
 /**Set security HTTP-Header */
+app.use(helmet());
 app.use(
-  helmet({
-    contentSecurityPolicy: false
+  helmet.contentSecurityPolicy({
+    directives: {
+      baseUri: ["'self'"],
+      defaultSrc: ["'self'", 'http:', 'https:', 'ws:', 'blob:', 'data:'],
+      fontSrc: ["'self'", 'https:', 'data:'],
+      scriptSrc: ["'self'", 'https:', 'blob:'],
+      objectSrc: ["'none'"],
+      styleSrc: ["'self'", 'https:', "'unsafe-inline'"],
+      upgradeInsecureRequests: []
+    }
   })
 );
 
