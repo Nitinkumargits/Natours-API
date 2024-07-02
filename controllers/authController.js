@@ -77,7 +77,6 @@ exports.signup = catchAsync(async (req, res, next) => {
     }
   });
 });
-
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
   // 1> check if  email and password exist
