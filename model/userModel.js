@@ -31,7 +31,8 @@ const userSchema = new mongoose.Schema(
      for uplode a photo,but its not require,Photo is mostly optional in web app, 
      if the user want to upload the photo,that will store in somewher in  our file-system , and path to that photo is store into this photo-field
      */
-    photo: String,
+    photo: { type: String, default: 'default.jpg' },
+
     role: {
       type: String,
       enum: ['user', 'guide', 'lead-guide', 'admin'],

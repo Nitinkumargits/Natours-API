@@ -31,7 +31,18 @@ router.patch('/updateMyPassword', authContoller.updatePassword);
 router.get('/me', userController.getMe, userController.getUser);
 //--------------------------------------------------------------
 //it is a protected route only the currently authenticated user can update data of the current-user,it is secure bcz the id of the user thats is gonna be updated come form the req.user(which was set by protect-middleWare ,which in turn  got the id from the jsonWebToken , Since no one change the in the JWT without knowing the secret ,then ID is safe )
-router.patch('/updateMe', userController.updateMe);
+/**
+ # Multer
+ -we include the multer package with that we create an upload ,upload is just to define a couple of setting ,then we use that upload to create a new middleware that we can add to stack of  /updateMe route that we want to upload the file || upload.single('photo') || .single() bcz we only have one sigle file, and pass  name of the field that is going to hold this file(i.e photo), this single() middleware is taking the file and basically copying it to the destination that we specified , after that it will call next middleware in stack i.e  updateMe
+ -sigle MW we will put the file or at least some information about the file on the request object 
+
+ */
+router.patch(
+  '/updateMe',
+  userController.uploadUserPhoto,
+  userController.resizeUserPhoto,
+  userController.updateMe
+);
 //--------------------------------------------------------------
 router.delete('/deleteMe', userController.deleteMe);
 //--------------------------------------------------------------

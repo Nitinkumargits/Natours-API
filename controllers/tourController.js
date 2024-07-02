@@ -1,11 +1,68 @@
 //CRUD operation with MongoDB (performed in API)
-
+const multer = require('multer');
+const sharp = require('sharp');
 const Tour = require('./../model/tourModel');
 // const APIFeatures = require('./../utils/APIFeatures');/
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const factory = require('./handlerFactory');
 
+const multerStorage = multer.memoryStorage();
+
+// To check if the uploaded files are image or not
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('Not an image! Please upload only images.', 400), false);
+  }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter
+});
+
+// upload.array('images', 3)--> For multiple files(single filed)
+// upload.single('image')--> For a single file
+
+// Multiple files(multiple fields)or mixied fields
+exports.uploadTourImages = upload.fields([
+  { name: 'imageCover', maxCount: 1 }, //only have one feild clld imageCover which going to process
+  { name: 'images', maxCount: 3 }
+]);
+
+exports.resizeTourImages = catchAsync(async (req, res, next) => {
+  // console.log(req.files);
+  if (!req.files.imageCover || !req.files.images) return next();
+
+  // 1) Cover image
+  req.body.imageCover = `tour-${req.params.id}-cover.jpeg`; // DB
+  await sharp(req.files.imageCover[0].buffer)
+    .resize(2000, 1333)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/tours/${req.body.imageCover}`);
+
+  // 2) Images
+  req.body.images = [];
+  await Promise.all(
+    req.files.images.map(async (file, index) => {
+      const fileName = `tour-${req.params.id}-${index + 1}.jpeg`;
+
+      await sharp(file.buffer)
+        .resize(2000, 1333)
+        .toFormat('jpeg')
+        .jpeg({ quality: 90 })
+        .toFile(`public/img/tours/${fileName}`);
+
+      req.body.images.push(fileName);
+    })
+  );
+  next();
+});
+
+// top-5-cheap ////////////////////////////////////////////////////
 //middleware('/top-5-cheap' route)
 exports.aliasTopTours = (req, res, next) => {
   //maniputlate the query object or prefill(?limit=5&sort=-ratingsAverage,price)

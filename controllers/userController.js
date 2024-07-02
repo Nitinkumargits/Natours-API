@@ -1,10 +1,61 @@
 ////////////////////////////////////////////////////////////////////////////////////
 
 //Route-handler for Users
+const multer = require('multer');
+const sharp = require('sharp');
 const User = require('./../model/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const factory = require('./handlerFactory');
+
+// const multerStorage = multer.diskStorage({
+//   // this destination is the callback function , which has access to (currentRequest,currently upload file , also an callbackfunction bit like a next() function in express (but this callback doen't come the express ))
+//   destination: (req, file, cb) => {
+//     //cb(error,actuall destination)
+//     cb(null, 'public/img/users');
+//   },
+//   //(req,req.file,callback)
+//   filename: (req, file, cb) => {
+//     // user-userID-timestamp(filename)
+//     // file.mimetype--> 'image/jpeg'
+//     const ext = file.mimetype.split('/')[1];
+//     cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
+//   }
+// });
+
+const multerStorage = multer.memoryStorage(); //this way image will storaged as buffer (req.file.buffer)
+
+// To check if the uploaded files are image or not
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('Please upload only images.', 400), false);
+  }
+};
+/**
+ config-multer acc. to our need 
+ -create one multer storage and one multer filter and use it 
+ */
+
+const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
+
+exports.uploadUserPhoto = upload.single('photo');
+
+// To resize user photo
+exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
+  if (!req.file) return next();
+
+  req.file.filename = `user-${req.user.id}.jpeg`;
+
+  await sharp(req.file.buffer)
+    .resize(500, 500)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/users/${req.file.filename}`);
+
+  next();
+});
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -38,6 +89,9 @@ exports.getMe = (req, res, next) => {
  */
 
 exports.updateMe = catchAsync(async (req, res, next) => {
+  // console.log(req.file);
+  // console.log(req.body);
+
   //1> create error if user POSTed password data
   if (req.body.password || req.body.passwordConfirm) {
     return next(
@@ -54,6 +108,8 @@ exports.updateMe = catchAsync(async (req, res, next) => {
    filteredBody make sure it only conatin name and email(only field that you allowed to update)
    */
   const filteredBody = filterObj(req.body, 'name', 'email');
+  if (req.file) filteredBody.photo = req.file.filename;
+  // filename--> user-userId-timestamp
   //3> Update user document
   /**
    save method is not the correct option,instead we can do now use findByIdAndUpdate (we could not use this before bcz create and save ),but now we not dealing with password but only with the non-sensitive data like name and email
