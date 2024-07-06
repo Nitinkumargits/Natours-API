@@ -21,6 +21,7 @@ const app = express();
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+const bookingRouter = require('./routes/bookingRoutes');
 // const cors = require('cors');
 
 /**----------Global-middleWare-------------------------*/
@@ -86,7 +87,7 @@ app.use(
 );
 
 //--------------------------------------------
-/**Mounting the router */
+/**Mounting the router ( integrate with API )*/
 /**
   //Mounting the router(mounting new-router(tourRouter middlerware,userRouter middlerware)  to route these two router will be a middlerware that's why we put inside app.use() in order to mount them)
  */
@@ -94,6 +95,7 @@ app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
+app.use('/api/v1/bookings', bookingRouter);
 //----------------------------------------------
 //Test midddleWare
 app.use((req, res, next) => {
