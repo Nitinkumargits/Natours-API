@@ -1,19 +1,17 @@
 /* eslint-disable */
-
 import axios from 'axios';
-import { showAlert } from './alert';
+import { showAlert } from './alerts';
+const stripe = Stripe('pk_test_BUkd0ZXAj6m0q0jMyRgBxNns00PPtgvjjr');
 
 export const bookTour = async tourId => {
-  const stripe = Stripe(
-    //public-key
-    'pk_test_51IAz1lG6PPOjwmB8qmOjJW9juoI8mXyQ4HLOaLB6aNCOGGpD0e3TDASUfVDUF4Gi7kfulFcRK4ZoVRIz8Y2uql8L00yLDiP9Wj'
-  );
   try {
     // 1) Get checkout session from API
-    const session = await axios(`/api/v1/bookings/checkout-session/${tourId}`);
-    // console.log(session);
+    const session = await axios(
+      `http://127.0.0.1:3000/api/v1/bookings/checkout-session/${tourId}`
+    );
+    console.log(session);
 
-    // 2) Create checkout form + charge credit card
+    // 2) Create checkout form + chanre credit card
     await stripe.redirectToCheckout({
       sessionId: session.data.session.id
     });

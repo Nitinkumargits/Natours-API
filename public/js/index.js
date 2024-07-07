@@ -3,15 +3,14 @@ import '@babel/polyfill';
 import { displayMap } from './mapbox';
 import { login, logout } from './login';
 import { updateSettings } from './updateSettings';
-import { signup } from './signup';
 import { bookTour } from './stripe';
+
 // DOM ELEMENTS
 const mapBox = document.getElementById('map');
 const loginForm = document.querySelector('.form--login');
 const logOutBtn = document.querySelector('.nav__el--logout');
 const userDataForm = document.querySelector('.form-user-data');
 const userPasswordForm = document.querySelector('.form-user-password');
-const signupForm = document.querySelector('.signup-form');
 const bookBtn = document.getElementById('book-tour');
 
 // DELEGATION
@@ -20,58 +19,27 @@ if (mapBox) {
   displayMap(locations);
 }
 
-// SIGNUP NEWUSER USING AXION(API) //////////////////////////////////////////////////////////////////////
-if (signupForm) {
-  signupForm.addEventListener('submit', async e => {
+if (loginForm)
+  loginForm.addEventListener('submit', e => {
     e.preventDefault();
-
-    // Change button text while Signing up a new user
-    document.querySelector('.btn--signup').innerText = 'Signing...';
-
-    const name = document.getElementById('name').value;
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    const passwordConfirm = document.getElementById('passwordconfirm').value;
-    await signup(name, email, password, passwordConfirm);
-
-    // Change button text and clear input-fields after Signing up new user
-    document.querySelector('.btn--signup').innerText = 'Signup';
-    signupForm.reset();
+    login(email, password);
   });
-}
-
-if (loginForm) {
-  loginForm.addEventListener('submit', async e => {
-    e.preventDefault();
-
-    // Change button text while login
-    document.querySelector('.btn--login').innerText = 'Logging...';
-
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-
-    await login(email, password);
-
-    // Change button text after login
-    document.querySelector('.btn--login').innerText = 'Login';
-  });
-}
 
 if (logOutBtn) logOutBtn.addEventListener('click', logout);
 
-if (userDataForm) {
+if (userDataForm)
   userDataForm.addEventListener('submit', e => {
     e.preventDefault();
-
     const form = new FormData();
     form.append('name', document.getElementById('name').value);
     form.append('email', document.getElementById('email').value);
     form.append('photo', document.getElementById('photo').files[0]);
-    // console.log(form);
+    console.log(form);
 
     updateSettings(form, 'data');
   });
-}
 
 if (userPasswordForm)
   userPasswordForm.addEventListener('submit', async e => {
@@ -92,14 +60,9 @@ if (userPasswordForm)
     document.getElementById('password-confirm').value = '';
   });
 
-// BOOKING PAYMENT BUTTON
-if (bookBtn) {
+if (bookBtn)
   bookBtn.addEventListener('click', e => {
-    e.target.innerText = 'Processing...';
+    e.target.textContent = 'Processing...';
     const { tourId } = e.target.dataset;
     bookTour(tourId);
   });
-}
-
-const alertMessage = document.querySelector('body').dataset.alert;
-if (alertMessage) showAlert('success', alertMessage, 20);
