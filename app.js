@@ -15,6 +15,7 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 const viewRouter = require('./routes/viewRoutes');
 const cookieParser = require('cookie-parser');
+const compression = require('compression');
 
 const app = express();
 
@@ -86,6 +87,8 @@ app.use(
   })
 );
 
+/**Copression MiddleWare */
+app.use(compression());
 //--------------------------------------------
 /**Mounting the router ( integrate with API )*/
 /**
