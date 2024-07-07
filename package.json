@@ -4,7 +4,8 @@
   "description": "app build with node, express and postman",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon server.js",
+    "dev": "nodemon server.js",
+    "start": "node server.js",
     "start:pro": "SET NODE_ENV=production & nodemon server.js",
     "debug": "ndb server.js",
     "watch:js": "parcel watch ./public/js/index.js --out-dir ./public/js --out-file ./public/js/bundle.js --public-url .",
