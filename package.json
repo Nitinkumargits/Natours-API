@@ -25,6 +25,7 @@
     "express-mongo-sanitize": "^2.2.0",
     "express-rate-limit": "^7.2.0",
     "helmet": "^7.1.0",
+    "heroku": "^8.11.5",
     "hpp": "^0.2.3",
     "html-to-text": "^9.0.5",
     "jsonwebtoken": "^9.0.2",
@@ -54,6 +55,6 @@
     "prettier": "^1.17.0"
   },
   "engines": {
-    "node": ">=10.0.0"
+    "node": "^10"
   }
 }

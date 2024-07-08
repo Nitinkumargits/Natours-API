@@ -19,13 +19,18 @@ const compression = require('compression');
 
 const app = express();
 
+app.enable('trust proxy');
+
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
-// const cors = require('cors');
+const cors = require('cors');
 
 /**----------Global-middleWare-------------------------*/
+app.use(cors());
+app.options('*', cors()); //for all routes
+
 /**Set security HTTP-Header */
 app.use(helmet());
 app.use(

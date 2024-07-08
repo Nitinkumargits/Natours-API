@@ -17,34 +17,29 @@ const signToken = id => {
   });
 };
 
-const createSendToken = (user, statusCode, res) => {
+const createSendToken = (user, statusCode, req, res) => {
   const token = signToken(user._id);
   const cookieOptions = {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
-    /**
-     this means we can't manipulate the cookie inn the browser in any way not even delete it , if we wnat to use this secure way of storing cookie , then how we gona loggout user on  our website 
-     bz usually with JWT-authentication we just delete the cookie or token from the local storage (not possible using this wayy )
-     create a simple logout route that simply snt back a new cookie with exact same name but without the token 
-     that will override the current cookie have in the browser with that has the same name but no token
-     when that cookie snt along with the next request then will not be able to identify the user as being logged in then
-     this will effectively log out user ,we gonna gift this cookie a very short expiration time 
-     */
-    httpOnly: true
+    // secure: true, // cookie will only be sent on an encrypted connection(https)
+    httpOnly: true // cookie can't be modified by the browser
   };
-  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+  cookieOptions.secure =
+    req.secure || req.headers['x-forwarded-proto'] === 'https';
 
   res.cookie('jwt', token, cookieOptions);
 
-  // Remove password from output
+  // Removes the password from output
+  // eslint-disable-next-line no-param-reassign
   user.password = undefined;
 
   res.status(statusCode).json({
     status: 'success',
-    token,
+    token: token,
     data: {
-      user
+      user: user
     }
   });
 };
@@ -123,7 +118,7 @@ exports.login = catchAsync(async (req, res, next) => {
   // 3> if everything okay send token(JWT) to client
   // const token = signToken(user._id);
   // res.status(200).json({ status: 'Success', token, user });
-  createSendToken(user, 200, res);
+  createSendToken(user, 200, req, res);
 });
 
 exports.logout = (req, res) => {
@@ -318,7 +313,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   await user.save();
   //3> Update changedPasswordAt property for the user
   //4> Log the user in , send JWT
-  createSendToken(user, 200, res);
+  createSendToken(user, 200, req, res);
   // const token = signToken(user._id);
   // res.status(200).json({
   //   status: 'Success',
@@ -346,5 +341,5 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   await user.save();
   // User.findByIdAndUpdate will NOT work as intended!(.create() and .save())
   // 4> log user in , snd JWT
-  createSendToken(user, 200, res);
+  createSendToken(user, 200, req, res);
 });

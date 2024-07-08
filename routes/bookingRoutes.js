@@ -9,8 +9,12 @@ router.use(authController.protect); // All the routes(middlewares) after this mi
  route we gonna create here not follow the REST principle bcz this not gonna about creating,deleting,and updating 
  this route only be for the client to get a checkout session 
  */
-router.get('/checkout-session/:tourId', bookingController.getCheckoutSession);
 
+router.get(
+  '/checkout-session/:tourId',
+  bookingController.getCheckoutSession,
+  bookingController.createBookingCheckout
+);
 router.use(authController.restrictTo('admin', 'lead-guide')); // Only admin can access the routes below this middleware
 
 router
