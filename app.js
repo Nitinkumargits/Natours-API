@@ -19,7 +19,7 @@ const compression = require('compression');
 
 const app = express();
 
-app.enable('trust proxy');
+// app.enable('trust proxy');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
