@@ -15,16 +15,22 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 const viewRouter = require('./routes/viewRoutes');
 const cookieParser = require('cookie-parser');
+const compression = require('compression');
 
 const app = express();
+
+// app.enable('trust proxy');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
-// const cors = require('cors');
+const cors = require('cors');
 
 /**----------Global-middleWare-------------------------*/
+app.use(cors());
+app.options('*', cors()); //for all routes
+
 /**Set security HTTP-Header */
 app.use(helmet());
 app.use(
@@ -86,6 +92,8 @@ app.use(
   })
 );
 
+/**Copression MiddleWare */
+app.use(compression());
 //--------------------------------------------
 /**Mounting the router ( integrate with API )*/
 /**

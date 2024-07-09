@@ -1,24 +1,22 @@
 /* eslint-disable */
-
 import axios from 'axios';
-import { showAlert } from './alert';
+import { showAlert } from './alerts';
+// import Stripe from 'stripe';
 
 export const bookTour = async tourId => {
   const stripe = Stripe(
-    //public-key
-    'pk_test_51IAz1lG6PPOjwmB8qmOjJW9juoI8mXyQ4HLOaLB6aNCOGGpD0e3TDASUfVDUF4Gi7kfulFcRK4ZoVRIz8Y2uql8L00yLDiP9Wj'
+    'pk_test_51PZqQ5IxMdURXTfy804fwNYPiXxWqX3f0D8zenRYfUpIzQLm42AES8oYA9KStVh4k1dS7w967AxlRYUNnJQLCx5w00gg5TBMP1'
   );
   try {
     // 1) Get checkout session from API
     const session = await axios(`/api/v1/bookings/checkout-session/${tourId}`);
-    // console.log(session);
 
     // 2) Create checkout form + charge credit card
     await stripe.redirectToCheckout({
       sessionId: session.data.session.id
     });
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     showAlert('error', err);
   }
 };

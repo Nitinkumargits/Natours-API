@@ -18,7 +18,7 @@ module.exports = class Email {
     this.to = user.email;
     this.firstName = user.name.split(' ')[0];
     this.url = url;
-    this.from = `Jonas Schmedtmann <${process.env.EMAIL_FROM}>`;
+    this.from = `Nitin kumar <${process.env.EMAIL_FROM}>`;
   }
 
   newTransport() {
@@ -34,8 +34,10 @@ module.exports = class Email {
     }
 
     return nodemailer.createTransport({
+      service: 'gmail',
       host: process.env.EMAIL_HOST,
       port: process.env.EMAIL_PORT,
+      secure: false,
       auth: {
         user: process.env.EMAIL_USERNAME,
         pass: process.env.EMAIL_PASSWORD

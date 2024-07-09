@@ -223,14 +223,14 @@ toursSchema.pre('save', function(next) {
  */
 
 toursSchema.pre('save', function(next) {
-  console.log('will save document');
+  // console.log('will save document');
   next();
 });
 
 //Post MW->acces to the document that was just saved to database and next()
 ///post MW will executed after all pre-MW fucntion executed
 toursSchema.post('save', function(doc, next) {
-  console.log('Document:', doc);
+  // console.log('Document:', doc);
   next();
 });
 //////////////////////////////////////////////////////////////////////////////////////////////

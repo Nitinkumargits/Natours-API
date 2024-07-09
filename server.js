@@ -58,3 +58,11 @@ process.on('unhandledRejection', err => {
 });
 
 // console.log(x); //x is undefined
+// SIGTERM--> A signal that stops the program from running
+process.on('SIGTERM', () => {
+  console.log('👋zz SIGTERM RECEIVED, shutting down gracefully');
+  //close the server but before that still handle all the pending request,not close application abrupt
+  server.close(() => {
+    console.log('💥 process terminated');
+  });
+});
