@@ -9,7 +9,7 @@ process.on('uncaughtException', err => {
   process.exit(1);
 });
 
-dotenv.config({ path: './config.env' }); //this command will do read our variable from the file and save them in nodejs enviroment variable
+dotenv.config(); //this command will do read our variable from the file and save them in nodejs enviroment variable
 
 const app = require('./app');
 
