@@ -7,7 +7,7 @@ on:
 
 jobs:
   publish:
-    name: publish development image
+    name: publish Development Doker-Image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
