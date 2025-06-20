@@ -1761,11 +1761,12 @@ body {
   html {
     font-size: 44.25%;
   }
-  .cta {
-    padding: 4rem 2rem 2rem 18rem;
-  }
-
-  .user-view {
+  /* .cta {
+    display: grid;
+    grid-template-columns: 1fr;
+    row-gap: 1.2rem;
+    /* padding: 4rem 2rem 2rem 18rem; */
+  */ .user-view {
     max-width: 120rem;
     margin: 0 auto;
     min-height: 100vh;
@@ -1787,6 +1788,13 @@ body {
     -ms-flex: 32rem 0 0px;
     flex: 27rem 0 0;
     padding: 4rem 0;
+  }
+
+  .section-cta.cta {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 1.2rem;
   }
 }
 
@@ -1835,4 +1843,34 @@ body {
     justify-content: space-evenly;
     margin: 1.2rem 0 1.2rem 0;
   }
+
+  .cta__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .cta__text {
+    font-size: 1.9rem;
+    padding: 3.2rem;
+    font-weight: 400;
+  }
+
+  .section-description > * {
+    padding: 0 2vw;
+    padding-top: 14vw;
+    padding-bottom: calc(1vw + var(--section-rotate));
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 50%;
+    flex: 0 0 50% 50%;
+  }
+
+  /* .heading-secondary {
+    grid-area: 1/1/2/4;
+  } */
+  /* .cta {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  } */
 }
