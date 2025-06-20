@@ -1704,11 +1704,19 @@ body {
     margin-bottom: 0;
     margin-left: -2.8rem;
   }
-  .nav__el:not(:last-child),
+  /* .nav__el:not(:last-child),
   .nav__el--cta {
     margin-right: 0;
     margin-bottom: 1.2rem;
     display: none;
+  } */
+
+  .nav__el:not(:last-child),
+  .nav__el--cta {
+    margin-right: 0;
+    margin-bottom: 0.2rem;
+    margin-right: 3rem;
+    /* display: none; */
   }
 
   /* .nav__el--cta {
@@ -1810,7 +1818,7 @@ body {
   }
 
   .main {
-    padding: 3rem 0.6rem;
+    padding: 4rem 3.6rem;
     max-width: 120rem;
   }
   a.nav__el.nav__el--cta {
