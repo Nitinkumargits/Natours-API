@@ -1805,6 +1805,10 @@ body {
 }
 
 @media only screen and (max-width: 32em) {
+  html {
+    font-size: 37.5%;
+  }
+
   .main {
     padding: 3rem 0.6rem;
     max-width: 120rem;
