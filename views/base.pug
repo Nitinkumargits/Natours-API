@@ -10,7 +10,7 @@ html
       title Natours | #{title}
       //- meta(http-equiv='Content-Security-Policy' content="default-src 'self'; connect-src 'self' ws://localhost:51146;")
   
-  body
+  body(data-alert=`${alert?alert:''}`)
     // HEADER
     include _header
         

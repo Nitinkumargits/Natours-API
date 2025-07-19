@@ -10,6 +10,7 @@ const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
+const bookingController = require('./controllers/bookingController');
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 const hpp = require('hpp');
@@ -68,6 +69,12 @@ const limiter = rateLimit({
   message: 'Too many request form this IP , Please try again in 1hour'
 });
 app.use('/api', limiter);
+
+app.post(
+  '/webhook-checkout',
+  express.raw({ type: 'application/json' }),
+  bookingController.webhookCheckout
+);
 
 //Body parser, reading data form the body into req.body
 app.use(express.json({ limit: '10kb' }));
