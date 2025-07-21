@@ -80,7 +80,6 @@ app.post(
 app.use(express.json({ limit: '10kb' }));
 //cookie-parser
 app.use(cookieParser());
-
 // Data sanitization against NoSQL query injection(remove any mongo-operator(like $))
 app.use(mongoSanitize());
 // Data sanitization against XSS(clean malicious html-code)
@@ -98,7 +97,6 @@ app.use(
     ]
   })
 );
-
 /**Copression MiddleWare */
 app.use(compression());
 //--------------------------------------------

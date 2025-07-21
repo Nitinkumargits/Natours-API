@@ -45,10 +45,13 @@ const createSendToken = (user, statusCode, req, res) => {
 };
 //---------------------------------------------------------
 exports.signup = catchAsync(async (req, res, next) => {
-  /**
-      .create(pass obj with data from which user should be created),
-      User.create(req.body) return a promise so we should await that 
-    */
+  const { name, email, password, passwordConfirm } = req.body;
+  console.log(name, email, password, passwordConfirm);
+
+  if (!name || !email || !password || !passwordConfirm) {
+    return next(new AppError('Please provide all the details !', 400));
+  }
+
   const newUser = await User.create({
     name: req.body.name,
     email: req.body.email,
@@ -58,26 +61,13 @@ exports.signup = catchAsync(async (req, res, next) => {
     role: req.body.role
   });
 
+  console.log('newuser', newUser);
+
   const url = `${req.protocol}://${req.get('host')}/me`; //http://localhost:3000/me
   // console.log(url);
   await new Email(newUser, url).sendWelcome();
 
-  //  signin in/logged in new user */
-  //   const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-  //     expiresIn: process.env.JWT_EXPIRES_IN
-  //    });
-
-  // createSendToken(newUser, 201, res);
-
-  const token = signToken(newUser._id);
-
-  res.status(201).json({
-    status: 'success',
-    token,
-    data: {
-      user: newUser
-    }
-  });
+  createSendToken(newUser, 201, req, res);
 });
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
@@ -216,8 +206,9 @@ exports.isLoggedIn = async (req, res, next) => {
       }
       //if no problem in above step then next will be called,which will then get access to the route that we protected e.g- getAllToursHandler
       //Grant access to protected route
-      req.user = currentUser;
+      // req.user = currentUser;
       res.locals.user = currentUser;
+      return next();
     } catch (err) {
       return next();
     }
@@ -254,6 +245,7 @@ exports.restrictTo = (...roles) => {
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on POSTed email
   const user = await User.findOne({ email: req.body.email });
+  console.log('authcontorller/ forgotpass', user);
 
   if (!user) {
     return next(new AppError('No user found with provided email address', 404));
@@ -279,7 +271,6 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save({ validateBeforeSave: false });
-    // console.log(err);
     return next(
       new AppError('There is an error sending the email. Try again later!', 500)
     );

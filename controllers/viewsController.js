@@ -6,9 +6,10 @@ const Booking = require('../model/bookingModel');
 
 exports.alerts = (req, res, next) => {
   const { alert } = req.query;
+  console.log(alert);
   if (alert === 'booking') {
     res.locals.alert =
-      'Your booking was successful !.If your booking does not show up here immediatly,please come back later.';
+      'Your booking was successful ! If your booking does not show up here immediatly, please come back later.';
   }
   next();
 };
@@ -44,20 +45,31 @@ exports.getTour = catchAsync(async (req, res, next) => {
 });
 
 exports.getLoginForm = (req, res) => {
-  res
-    .status(200)
-    // .set(
-    //   'Content-Security-Policy'
-    //   // "default-src 'self' https://*.mapbox.com https://*.stripe.com ;base-uri 'self';block-all-mixed-content;font-src 'self' https: data:;frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src https://cdnjs.cloudflare.com https://api.mapbox.com https://js.stripe.com/v3/ 'self' blob: ;script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests;"
-    // )
-    .render('login', {
-      title: 'Log into your account',
-      user: req.user
-    });
+  res.status(200).render('login', {
+    title: 'Log into your account',
+    user: req.user
+  });
 };
+
 exports.getSignupForm = (req, res) => {
   res.status(200).render('signup', {
-    title: 'sign Up'
+    title: 'sign Up',
+    user: req.user
+  });
+};
+
+exports.getForgotPasswordForm = (req, res) => {
+  res.status(200).render('forgotPassword', {
+    title: 'ForgotPassword'
+  });
+};
+
+exports.renderResetPasswordForm = (req, res) => {
+  const { token } = req.params;
+
+  res.status(200).render('resetPassword', {
+    title: 'Reset your password',
+    token
   });
 };
 

@@ -3,14 +3,13 @@ const Tour = require('../model/tourModel');
 const User = require('../model/userModel');
 const Booking = require('../model/bookingModel');
 const factory = require('./handlerFactory');
-const AppError = require('../utils/appError');
+// const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 
 // Checkout session.
 exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   // 1) Get the currently booked tour
   const tour = await Tour.findById(req.params.tourId);
-  console.log(tour);
   // 2) Create checkout session
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
@@ -63,7 +62,6 @@ const createBookingCheckout = async session => {
   const tour = session.client_reference_id;
   const user = (await User.findOne({ email: session.customer_email })).id;
   const price = session.display_items[0].amount / 100;
-  console.log(tour, user, price);
   await Booking.create({ tour, user, price });
 };
 

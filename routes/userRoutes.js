@@ -17,7 +17,8 @@ router.post('/login', authContoller.login);
 router.get('/logout', authContoller.logout);
 //--------------------------------------------------------------
 /**Password Reset routes */
-router.post('/forgotPassword', authContoller.forgotPassword); //will only receive the email address
+router.post('/forgotPassword', authContoller.forgotPassword); //will only receive the email address /forgotpassword
+
 router.patch('/resetPassword/:token', authContoller.resetPassword); // will receive the token as well as new Password
 
 //--------------------------------------------------------------

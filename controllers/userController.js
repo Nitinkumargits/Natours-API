@@ -134,7 +134,6 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 
   res.status(204).json({ status: 'success', data: null });
 });
-exports.getUser = factory.getOne(User);
 
 exports.createUser = (req, res) => {
   res.status(500).json({
@@ -145,6 +144,7 @@ exports.createUser = (req, res) => {
 /**
  updateUser for administration  to update all the user data
  */
+exports.getUser = factory.getOne(User);
 exports.getAllUsers = factory.getAll(User);
 exports.updateUser = factory.updateOne(User);
 exports.deleteUser = factory.deleteOne(User);
