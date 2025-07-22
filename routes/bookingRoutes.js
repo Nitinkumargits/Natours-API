@@ -12,6 +12,13 @@ router.use(authController.protect); // All the routes(middlewares) after this mi
 
 router.get('/checkout-session/:tourId', bookingController.getCheckoutSession);
 
+// Stripe webhook route (must come BEFORE body-parser)
+router.post(
+  '/webhook-checkout',
+  express.raw({ type: 'application/json' }),
+  bookingController.webhookCheckout
+);
+
 // router.get(
 //   '/checkout-session/:tourId',
 //   bookingController.getCheckoutSession
