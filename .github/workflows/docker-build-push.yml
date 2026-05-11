@@ -106,8 +106,10 @@ jobs:
             echo "⏳ Waiting for app..."
             sleep 15
 
-            echo "🏥 Running health check..."
-            curl -f http://{{ secrets.EC2_HOST }}:3000 || exit 1
+            - name: Health check
+            run: |
+              echo "🏥 Running health check..."
+              curl -f http://${{ secrets.EC2_HOST }}:3000 || exit 1
 
             echo "🧹 Cleaning unused images..."
             docker image prune -af
