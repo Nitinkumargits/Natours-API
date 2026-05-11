@@ -51,6 +51,15 @@ app.use(
 // app.use(express.static(`${__dirname}/public`));
 app.use(express.static(path.join(__dirname, 'public')));
 
+/**
+ Fallback for missing user photos: if a /img/users/<file> request reaches here,
+ express.static already failed to find it on disk, so serve default.jpg
+ instead of letting the request fall through to the global 404 handler.
+ */
+app.use('/img/users', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'img', 'users', 'default.jpg'));
+});
+
 /**---------- Setting PUG -------------------------*/
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));

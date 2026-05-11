@@ -35,7 +35,8 @@ if (userDataForm)
     const form = new FormData();
     form.append('name', document.getElementById('name').value);
     form.append('email', document.getElementById('email').value);
-    form.append('photo', document.getElementById('photo').files[0]);
+    const photoFile = document.getElementById('photo').files[0];
+    if (photoFile) form.append('photo', photoFile);
 
     updateSettings(form, 'data');
   });

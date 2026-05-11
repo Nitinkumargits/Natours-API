@@ -242,27 +242,20 @@ toursSchema.post('save', function(doc, next) {
 
  -we using find-query(Tour.find() in   const features = new APIFeatures(Tour.find()>>here, req.query)) there for find-hook is executed 
  */
-toursSchema.pre(/^find/, function(next) {
-  //this-keyword point to crurrent query not the document , "this" is the query-obj so that we can chain all of the query
-  this.find({ secretTour: { $ne: true } }); //other tours are not currently set to false
+toursSchema.pre(/^find/, function() {
+  this.find({ secretTour: { $ne: true } });
   this.start = Date.now();
-  next();
 });
-toursSchema.pre(/^find/, function(next) {
+
+toursSchema.pre(/^find/, function() {
   this.populate({
     path: 'guides',
     select: '-__v -passwordChangedAt'
   });
-  next();
 });
-/**
- post query-Middleware run after query get executed,so it can access document that were return, bcz query finished at this point
- */
-toursSchema.post(/^find/, function(docs, next) {
-  // eslint-disable-next-line no-console
-  // console.log(`Query took ${Date.now() - this.start} millisecond`);
-  // console.log('Query docs:', docs);
-  next();
+
+toursSchema.post(/^find/, function(docs) {
+  // console.log(docs);
 });
 
 /** 
