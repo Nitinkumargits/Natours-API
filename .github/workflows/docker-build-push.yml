@@ -66,7 +66,8 @@ jobs:
               fi
             fi
           else
-            TAG_NAME="v$(date +%Y%m%d-%H%M%S)-${{ github.sha | cut -c1-7 }}"
+            SHA="${{ github.sha }}"
+            TAG_NAME="v$(date +%Y%m%d-%H%M%S)-${SHA:0:7}"
           fi
 
           echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
