@@ -131,17 +131,16 @@ docker run -d \
 
 ## Important: Environment Variables
 
-The Docker image includes your config.env file, BUT:
-- ⚠️ Never commit sensitive secrets (API keys, passwords, JWT secrets) to GitHub
+The Docker image does NOT include config.env (it's in .gitignore for security):
+- ⚠️ Never commit secrets to GitHub - keep config.env in .gitignore
 - ✅ Always pass secrets as runtime environment variables: `docker run -e KEY=value`
-- ✅ Runtime env vars override config.env values
-- ✅ Use `--env-file prod.env` for managing multiple variables
+- ✅ Use `--env-file prod.env` to manage multiple variables at once
+- ✅ Keep prod.env on your server, not in Git
 
 The application reads environment variables in this order (highest to lowest priority):
 1. Runtime environment variables (passed to `docker run`)
 2. .env file (if using `--env-file`)
-3. config.env (bundled in the image)
-4. Default values in code
+3. Default values in code
 
 ```env
 NODE_ENV=production
