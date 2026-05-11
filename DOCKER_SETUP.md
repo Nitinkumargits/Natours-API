@@ -121,6 +121,15 @@ EMAIL_PASSWORD=your-app-password
 EMAIL_FROM=noreply@natours.com
 EOF
 
+# Secure permissions
+chmod 600 /opt/natours/prod.env
+
+# Install Docker if not already installed
+sudo yum update -y
+sudo yum install docker -y
+sudo systemctl start docker
+sudo usermod -a -G docker ec2-user
+
 # Run with --env-file
 docker run -d \
   --name natours \
@@ -132,12 +141,14 @@ docker run -d \
 ## Important: Environment Variables
 
 The Docker image does NOT include config.env (it's in .gitignore for security):
+
 - ⚠️ Never commit secrets to GitHub - keep config.env in .gitignore
 - ✅ Always pass secrets as runtime environment variables: `docker run -e KEY=value`
 - ✅ Use `--env-file prod.env` to manage multiple variables at once
 - ✅ Keep prod.env on your server, not in Git
 
 The application reads environment variables in this order (highest to lowest priority):
+
 1. Runtime environment variables (passed to `docker run`)
 2. .env file (if using `--env-file`)
 3. Default values in code
