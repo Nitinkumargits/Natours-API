@@ -71,20 +71,24 @@ jobs:
           script: |
             set -e
 
-            echo "🐳 Pulling latest image..."
-            docker pull ${{ env.IMAGE_NAME }}:latest
+            IMAGE_TAG=${{ needs.build-and-push.outputs.image_version }}
+
+            echo "🐳 Pulling image: $IMAGE_TAG"
+
+            docker pull ${{ env.IMAGE_NAME }}:$IMAGE_TAG
 
             echo "🛑 Stopping old container..."
             docker stop app || true
             docker rm app || true
 
             echo "🚀 Starting new container..."
+
             docker run -d \
               --name app \
               --restart always \
               -p 3000:3000 \
               --env-file /opt/natours/prod.env \
-              ${{ env.IMAGE_NAME }}:latest
+              ${{ env.IMAGE_NAME }}:$IMAGE_TAG
 
             echo "⏳ Waiting for app..."
             sleep 15
