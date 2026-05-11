@@ -45,7 +45,51 @@ jobs:
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata
+        id: meta
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            if [ "${{ github.event.inputs.tag_type }}" == "version" ]; then
+              VERSION_NUM="${{ github.event.inputs.version_number }}"
+              if [ -z "$VERSION_NUM" ]; then
+                echo "Error: version_number is required for version tag type"
+                exit 1
+              fi
+              TAG_NAME="v${VERSION_NUM}"
+            else
+              TAG_NAME="${{ github.event.inputs.custom_tag }}"
+              if [ -z "$TAG_NAME" ]; then
+                echo "Error: custom_tag is required for custom tag type"
+                exit 1
+              fi
+            fi
+          else
+            TAG_NAME="v$(date +%Y%m%d-%H%M%S)-${{ github.sha | cut -c1-7 }}"
+          fi
+
+          echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
+
+          # Extract semantic version tags (e.g., v1.2.3 -> v1, v1.2, v1.2.3)
+          if [[ ${TAG_NAME} =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            PATCH="${BASH_REMATCH[3]}"
+            echo "version_major=v${MAJOR}" >> $GITHUB_OUTPUT
+            echo "version_minor=v${MAJOR}.${MINOR}" >> $GITHUB_OUTPUT
+            echo "version_patch=v${MAJOR}.${MINOR}.${PATCH}" >> $GITHUB_OUTPUT
+          elif [[ ${TAG_NAME} =~ ^v([0-9]+)$ ]]; then
+            # Handle v1, v2, v3 style tags
+            MAJOR="${BASH_REMATCH[1]}"
+            echo "version_major=v${MAJOR}" >> $GITHUB_OUTPUT
+            echo "version_minor=" >> $GITHUB_OUTPUT
+            echo "version_patch=" >> $GITHUB_OUTPUT
+          else
+            echo "version_major=" >> $GITHUB_OUTPUT
+            echo "version_minor=" >> $GITHUB_OUTPUT
+            echo "version_patch=" >> $GITHUB_OUTPUT
+          fi
 
       - name: Build Docker image
         uses: docker/build-push-action@v5
