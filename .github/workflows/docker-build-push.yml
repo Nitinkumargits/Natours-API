@@ -4,35 +4,13 @@ on:
   push:
     branches:
       - master
-  workflow_dispatch:
-    inputs:
-      tag_type:
-        description: 'Tag type: version (v1, v2, etc) or custom'
-        required: true
-        default: 'version'
-        type: choice
-        options:
-          - version
-          - custom
-      version_number:
-        description: 'Major version number (e.g., 1 for v1, 2 for v2) - only for version type'
-        required: false
-        default: ''
-      custom_tag:
-        description: 'Custom tag name (e.g., v1.0.0, release-1) - only for custom type'
-        required: false
-        default: ''
 
 env:
-  REGISTRY: docker.io
   IMAGE_NAME: nitinkdocker18/natoursapi
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
 
     steps:
       - name: Checkout code
@@ -41,93 +19,46 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Docker Hub
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Extract metadata
-        id: meta
+      - name: Get next version
+        id: version
         run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            if [ "${{ github.event.inputs.tag_type }}" == "version" ]; then
-              VERSION_NUM="${{ github.event.inputs.version_number }}"
-              if [ -z "$VERSION_NUM" ]; then
-                echo "Error: version_number is required for version tag type"
-                exit 1
-              fi
-              TAG_NAME="v${VERSION_NUM}"
-            else
-              TAG_NAME="${{ github.event.inputs.custom_tag }}"
-              if [ -z "$TAG_NAME" ]; then
-                echo "Error: custom_tag is required for custom tag type"
-                exit 1
-              fi
-            fi
+          # Fetch tags from Docker Hub
+          TAGS=$(curl -s https://hub.docker.com/v2/repositories/nitinkdocker18/natoursapi/tags?page_size=100 | jq -r '.results[].name')
+
+          # Extract version numbers like v1, v2, v3
+          LATEST_VERSION=$(echo "$TAGS" \
+            | grep -E '^v[0-9]+$' \
+            | sed 's/v//' \
+            | sort -n \
+            | tail -1)
+
+          # Default to v1 if no tags exist
+          if [ -z "$LATEST_VERSION" ]; then
+            NEXT_VERSION=1
           else
-            SHA="${{ github.sha }}"
-            TAG_NAME="v$(date +%Y%m%d-%H%M%S)-${SHA:0:7}"
+            NEXT_VERSION=$((LATEST_VERSION + 1))
           fi
 
-          echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
+          echo "VERSION=v$NEXT_VERSION" >> $GITHUB_ENV
+          echo "Generated version: v$NEXT_VERSION"
 
-          # Extract semantic version tags (e.g., v1.2.3 -> v1, v1.2, v1.2.3)
-          if [[ ${TAG_NAME} =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
-            MAJOR="${BASH_REMATCH[1]}"
-            MINOR="${BASH_REMATCH[2]}"
-            PATCH="${BASH_REMATCH[3]}"
-            echo "version_major=v${MAJOR}" >> $GITHUB_OUTPUT
-            echo "version_minor=v${MAJOR}.${MINOR}" >> $GITHUB_OUTPUT
-            echo "version_patch=v${MAJOR}.${MINOR}.${PATCH}" >> $GITHUB_OUTPUT
-          elif [[ ${TAG_NAME} =~ ^v([0-9]+)$ ]]; then
-            # Handle v1, v2, v3 style tags
-            MAJOR="${BASH_REMATCH[1]}"
-            echo "version_major=v${MAJOR}" >> $GITHUB_OUTPUT
-            echo "version_minor=" >> $GITHUB_OUTPUT
-            echo "version_patch=" >> $GITHUB_OUTPUT
-          else
-            echo "version_major=" >> $GITHUB_OUTPUT
-            echo "version_minor=" >> $GITHUB_OUTPUT
-            echo "version_patch=" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Build Docker image
+      - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: false
-          load: true
-          tags: ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tag_name }}
-          cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache
-          cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+            ${{ env.IMAGE_NAME }}:latest
 
-      - name: Push Docker image
+      - name: Print image info
         run: |
-          docker push ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tag_name }}
-          docker tag ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tag_name }} ${{ env.IMAGE_NAME }}:latest
-          docker push ${{ env.IMAGE_NAME }}:latest
-
-          # Push semantic version tags if available
-          if [ -n "${{ steps.meta.outputs.version_major }}" ]; then
-            docker tag ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tag_name }} ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version_major }}
-            docker push ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version_major }}
-
-            docker tag ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tag_name }} ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version_minor }}
-            docker push ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version_minor }}
-
-            docker tag ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tag_name }} ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version_patch }}
-            docker push ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version_patch }}
-          fi
-
-      - name: Print deployment info
-        run: |
-          echo "✅ Docker image successfully built and pushed"
-          echo "📦 Main tag: ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tag_name }}"
-          echo "📦 Also tagged as: ${{ env.IMAGE_NAME }}:latest"
-          if [ -n "${{ steps.meta.outputs.version_major }}" ]; then
-            echo "📦 Semantic versions:"
-            echo "   - ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version_major }}"
-            echo "   - ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version_minor }}"
-            echo "   - ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version_patch }}"
-          fi
+          echo "✅ Successfully pushed:"
+          echo "${{ env.IMAGE_NAME }}:${{ env.VERSION }}"
+          echo "${{ env.IMAGE_NAME }}:latest"
