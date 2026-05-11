@@ -1,20 +1,49 @@
-# Use official Node.js LTS image
-FROM node:18-alpine
+# Build stage
+FROM node:18-alpine AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy package files
 COPY package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the backend code
+# Copy application code
 COPY . .
 
-# Expose backend port (assuming 4000)
+# Build the JavaScript bundle
+RUN npm run build:js
+
+# Production stage
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install dumb-init to handle signals properly
+RUN apk add --no-cache dumb-init
+
+# Copy package files
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm install --only=production
+
+# Copy application code
+COPY . .
+
+# Copy pre-built bundle from builder stage
+COPY --from=builder /app/public/js/bundle.js ./public/js/
+COPY --from=builder /app/public/js/bundle.js.map ./public/js/
+
+# Expose port
 EXPOSE 3000
 
-# Start the backend server
+# Set NODE_ENV to production
+ENV NODE_ENV=production
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start the application
 CMD ["npm", "start"]
