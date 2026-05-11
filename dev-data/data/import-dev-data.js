@@ -5,7 +5,7 @@ const fs = require('fs');
 // const Review = require('./../../model/reviewModel');
 const User = require('./../../model/userModel');
 
-dotenv.config({ path: './config.env' });
+dotenv.config({ path: './prod.env' });
 
 /**MongoDB */
 /** connection string for mongoose i.e DB */

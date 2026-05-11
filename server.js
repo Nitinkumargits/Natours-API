@@ -9,7 +9,7 @@ process.on('uncaughtException', err => {
   process.exit(1);
 });
 
-dotenv.config({ path: './config.env' }); //this command will do read our variable from the file and save them in nodejs enviroment variable
+dotenv.config({ path: './prod.env' }); //this command will do read our variable from the file and save them in nodejs enviroment variable
 
 const app = require('./app');
 
@@ -34,7 +34,7 @@ mongoose
 /**------StartServer------------------------------*/
 const port = process.env.PORT || 3000;
 
-const server = app.listen(port, () => {
+const server = app.listen(port, '0.0.0.0', () => {
   console.log(`App start at port : ${port} 🚀🚀🚀`);
 });
 
