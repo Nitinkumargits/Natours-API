@@ -71,6 +71,8 @@ Image will be tagged as: `nitinkdocker18/natoursapi:v1.0.0` and `nitinkdocker18/
 
 ### 4. Pull and Run Image from Docker Hub
 
+**Important**: The config.env file from your repo is included in the image, but runtime environment variables always override it. Never commit sensitive secrets to your repository.
+
 ```bash
 # Login to Docker Hub (first time only)
 docker login
@@ -78,15 +80,16 @@ docker login
 # Pull the image
 docker pull nitinkdocker18/natoursapi:latest
 
-# Run container with environment variables
+# Run container with REQUIRED environment variables
 docker run -d \
   --name natours \
   -p 3000:3000 \
   -e NODE_ENV=production \
   -e DATABASE=mongodb+srv://user:password@cluster.mongodb.net/db \
   -e PORT=3000 \
-  -e JWT_SECRET=your-secret-key \
+  -e JWT_SECRET=your-super-secret-key \
   -e JWT_EXPIRES_IN=90d \
+  -e JWT_COOKIE_EXPIRES_IN=90 \
   -e STRIPE_SECRET_KEY=sk_test_xxxxx \
   -e EMAIL_HOST=smtp.gmail.com \
   -e EMAIL_USERNAME=your-email@gmail.com \
@@ -101,9 +104,44 @@ docker logs -f natours
 docker stop natours
 ```
 
-## Environment Variables Required
+**Alternative: Use .env file with Docker**
 
-When running the Docker image, you need to provide these environment variables:
+```bash
+# Create a .env file with production variables
+cat > prod.env << EOF
+NODE_ENV=production
+DATABASE=mongodb+srv://user:password@cluster.mongodb.net/db
+JWT_SECRET=your-super-secret-key
+JWT_EXPIRES_IN=90d
+JWT_COOKIE_EXPIRES_IN=90
+STRIPE_SECRET_KEY=sk_test_xxxxx
+EMAIL_HOST=smtp.gmail.com
+EMAIL_USERNAME=your-email@gmail.com
+EMAIL_PASSWORD=your-app-password
+EMAIL_FROM=noreply@natours.com
+EOF
+
+# Run with --env-file
+docker run -d \
+  --name natours \
+  -p 3000:3000 \
+  --env-file prod.env \
+  nitinkdocker18/natoursapi:latest
+```
+
+## Important: Environment Variables
+
+The Docker image includes your config.env file, BUT:
+- ⚠️ Never commit sensitive secrets (API keys, passwords, JWT secrets) to GitHub
+- ✅ Always pass secrets as runtime environment variables: `docker run -e KEY=value`
+- ✅ Runtime env vars override config.env values
+- ✅ Use `--env-file prod.env` for managing multiple variables
+
+The application reads environment variables in this order (highest to lowest priority):
+1. Runtime environment variables (passed to `docker run`)
+2. .env file (if using `--env-file`)
+3. config.env (bundled in the image)
+4. Default values in code
 
 ```env
 NODE_ENV=production

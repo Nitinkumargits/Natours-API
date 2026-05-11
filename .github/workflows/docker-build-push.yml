@@ -55,10 +55,8 @@ jobs:
           push: true
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.VERSION }}
-            ${{ env.IMAGE_NAME }}:latest
 
       - name: Print image info
         run: |
           echo "✅ Successfully pushed:"
           echo "${{ env.IMAGE_NAME }}:${{ env.VERSION }}"
-          echo "${{ env.IMAGE_NAME }}:latest"

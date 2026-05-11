@@ -36,6 +36,9 @@ COPY . .
 COPY --from=builder /app/public/js/bundle.js ./public/js/
 COPY --from=builder /app/public/js/bundle.js.map ./public/js/
 
+# Copy config file (will be overridden by runtime env vars)
+COPY config.env ./
+
 # Expose port
 EXPOSE 3000
 
