@@ -12,6 +12,9 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
+    outputs:
+      image_version: ${{ steps.version.outputs.version }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -45,8 +48,12 @@ jobs:
             NEXT_VERSION=$((LATEST_VERSION + 1))
           fi
 
-          echo "VERSION=v$NEXT_VERSION" >> $GITHUB_ENV
-          echo "version=v$NEXT_VERSION" >> $GITHUB_OUTPUT
+          VERSION="v$NEXT_VERSION"
+
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          echo "Generated version: $VERSION"
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
@@ -56,6 +63,12 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
             ${{ env.IMAGE_NAME }}:latest
+
+      - name: Print image info
+        run: |
+          echo "✅ Successfully pushed:"
+          echo "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}"
+          echo "${{ env.IMAGE_NAME }}:latest"
 
   deploy:
     needs: build-and-push
@@ -93,10 +106,21 @@ jobs:
             echo "⏳ Waiting for app..."
             sleep 15
 
-            echo "🏥 Health check..."
+            echo "🏥 Running health check..."
             curl -f http://localhost:3000 || exit 1
 
-            echo "🧹 Cleanup..."
+            echo "🧹 Cleaning unused images..."
             docker image prune -af
 
-            echo "✅ Deployment successful"
+            echo "✅ Deployment successful!"
+
+      - name: Deployment Success
+        if: success()
+        run: |
+          echo "✅ Successfully deployed version:"
+          echo "${{ needs.build-and-push.outputs.image_version }}"
+
+      - name: Deployment Failed
+        if: failure()
+        run: |
+          echo "❌ Deployment failed"
