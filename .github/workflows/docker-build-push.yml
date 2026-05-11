@@ -100,7 +100,7 @@ jobs:
               --name app \
               --restart always \
               -p 3000:3000 \
-              --env-file /opt/natours/prod.env \
+              --env-file /opt/natours/config.env \
               ${{ env.IMAGE_NAME }}:$IMAGE_TAG
 
             echo "⏳ Waiting for app..."
