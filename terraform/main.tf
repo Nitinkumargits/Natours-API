@@ -99,6 +99,7 @@ resource "aws_default_security_group" "natours-sg" {
 }
 
 
+
 # ── AMI (Ubuntu 22.04 LTS) ────────────────────────────────────────────────────
 
 data "aws_ami" "ubuntu" {
