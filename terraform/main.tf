@@ -128,16 +128,9 @@ resource "aws_instance" "natours-server" {
 
   associate_public_ip_address = true
 
-  user_data = <<-USERDATA
-    #!/bin/bash
-    set -e
-    mkdir -p /home/ubuntu/.ssh
-    echo '${var.ec2_public_key}' >> /home/ubuntu/.ssh/authorized_keys
-    chmod 700 /home/ubuntu/.ssh
-    chmod 600 /home/ubuntu/.ssh/authorized_keys
-    chown -R ubuntu:ubuntu /home/ubuntu/.ssh
-    ${file("${path.module}/entry-script.sh")}
-  USERDATA
+  user_data = templatefile("${path.module}/entry-script.sh", {
+    public_key = var.ec2_public_key
+  })
 
   tags = {
     Name = "${var.env_prefix}-server"
