@@ -73,6 +73,7 @@ jobs:
           echo "${{ env.IMAGE_NAME }}:latest"
   terraform:
     name: Provision Infrastructure
+    needs: [build-and-push]
     runs-on: ubuntu-latest
     defaults:
       run:
