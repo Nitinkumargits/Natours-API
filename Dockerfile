@@ -32,7 +32,7 @@ RUN npm install --omit=dev
 COPY server.js ./
 COPY app.js ./
 COPY controllers ./controllers
-COPY models ./models
+COPY model ./model
 COPY routes ./routes
 COPY utils ./utils
 
