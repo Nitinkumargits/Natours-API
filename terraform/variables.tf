@@ -35,3 +35,8 @@ variable "my_ip" {
   sensitive   = true
 }
 
+variable "ec2_public_key" {
+  description = "SSH public key derived from EC2_SSH_KEY"
+  sensitive   = true
+}
+

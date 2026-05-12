@@ -96,6 +96,14 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Derive public key from EC2_SSH_KEY
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > /tmp/ssh_key
+          chmod 600 /tmp/ssh_key
+          PUBLIC_KEY=$(ssh-keygen -y -f /tmp/ssh_key)
+          rm /tmp/ssh_key
+          echo "TF_VAR_ec2_public_key=$PUBLIC_KEY" >> $GITHUB_ENV
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -107,13 +115,12 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-      - name: Import existing resources into state
+      - name: Import existing Route 53 records into state
         run: |
           ZONE_ID=$(aws route53 list-hosted-zones-by-name \
             --dns-name nitinkdevs.com \
             --query "HostedZones[0].Id" \
             --output text | sed 's|/hostedzone/||')
-          terraform import aws_key_pair.natours-key kp_natoursapi.pem || true
           terraform import aws_route53_record.natours-a "${ZONE_ID}_nitinkdevs.com_A" || true
           terraform import aws_route53_record.natours-www "${ZONE_ID}_www.nitinkdevs.com_A" || true
 
