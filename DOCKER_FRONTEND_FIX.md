@@ -25,7 +25,7 @@ The frontend was not showing on the Docker container running on EC2 because:
 COPY server.js ./
 COPY app.js ./
 COPY controllers ./controllers
-COPY models ./models
+COPY modelss ./modelss
 COPY routes ./routes
 COPY utils ./utils
 COPY config.env ./config.env
@@ -39,7 +39,7 @@ COPY --from=builder /app/public ./public
 COPY server.js ./
 COPY app.js ./
 COPY controllers ./controllers
-COPY models ./models
+COPY modelss ./modelss
 COPY routes ./routes
 COPY utils ./utils
 COPY prod.env ./prod.env

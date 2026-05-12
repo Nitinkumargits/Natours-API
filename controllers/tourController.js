@@ -1,7 +1,7 @@
 //CRUD operation with MongoDB (performed in API)
 const multer = require('multer');
 const sharp = require('sharp');
-const Tour = require('./../model/tourModel');
+const Tour = require('./../models/tourmodels');
 // const APIFeatures = require('./../utils/APIFeatures');/
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
@@ -99,7 +99,7 @@ exports.getAllTours = factory.getAll(Tour);
 //       findById() -> same as Tour.findOne({ _id:req.params.id })
 //   */
 //   /**
-//     - // name of the field that we want to populate i.e field calld guides in our model , with populate we actully wnt to fill the data
+//     - // name of the field that we want to populate i.e field calld guides in our models , with populate we actully wnt to fill the data
 //     -this populate fuction is absolutely fundamental tool for working with data in mongoose and when there are realtionship with data
 //     -behind the scenes , using populate will still actually create a new query ,it may affect your performace
 //   */
@@ -131,7 +131,7 @@ exports.getTour = factory.getOne(Tour, { path: 'reviews' });
 //     // newTour.save();//we call the method on new Document(newTour)
 
 //     //better way to create document
-//     //we call the create() method directly on the Tour model itself,create() return a promise
+//     //we call the create() method directly on the Tour models itself,create() return a promise
 //    */
 
 //   const newTour = await Tour.create(req.body);

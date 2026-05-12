@@ -1,6 +1,6 @@
 // review / rating / createdAt / ref to tour / ref to user
 const mongoose = require('mongoose');
-const Tour = require('./tourModel');
+const Tour = require('./tourmodels');
 
 const reviewSchema = new mongoose.Schema(
   {
@@ -116,6 +116,6 @@ reviewSchema.post(/^findOneAnd/, async function() {
   await this.r.constructor.calcAverageRatings(this.r.tour);
 });
 
-const Review = mongoose.model('Review', reviewSchema);
+const Review = mongoose.models('Review', reviewSchema);
 
 module.exports = Review;

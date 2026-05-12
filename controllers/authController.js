@@ -7,7 +7,7 @@ const crypto = require('crypto');
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const catchAsync = require('../utils/catchAsync');
-const User = require('./../model/userModel');
+const User = require('../modelss/usermodels');
 const AppError = require('./../utils/appError');
 const Email = require('./../utils/email');
 
@@ -77,7 +77,7 @@ exports.login = catchAsync(async (req, res, next) => {
   }
   // 2> check if  user exist and password is correct
   /**
-   //field and variable are same we can do this like  User.findOne({email}), this will not contain the password, but we do need the password(bcz we use password{select:false }in userModel) to check if itis correct,so we need to explicitly .select('+password') field that we needed like this it will back in the output
+   //field and variable are same we can do this like  User.findOne({email}), this will not contain the password, but we do need the password(bcz we use password{select:false }in usermodels) to check if itis correct,so we need to explicitly .select('+password') field that we needed like this it will back in the output
    */
   const user = await User.findOne({ email }).select('+password');
   //user Document
@@ -103,7 +103,7 @@ exports.login = catchAsync(async (req, res, next) => {
    how 
    "pass1234"==='$2a$12$yYr.P4dc8GT6HSjN412iie5.o5syj8WoYb.4p4qgzfrq/3Cuj6WC6'
    use the bcrypt package to generate the hash password and compare the password like above
-   bcrypt encrypt(pass1234) this and then compare it - create that function in userModel bcz it realted to data itself
+   bcrypt encrypt(pass1234) this and then compare it - create that function in usermodels bcz it realted to data itself
    */
   // 3> if everything okay send token(JWT) to client
   // const token = signToken(user._id);

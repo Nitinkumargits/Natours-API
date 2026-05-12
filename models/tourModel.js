@@ -3,7 +3,7 @@
 
 const mongoose = require('mongoose');
 const slugify = require('slugify');
-// const User = require('./userModel');
+// const User = require('./usermodels');
 // const validator = require('validator');
 /** MongoDB schema  */
 
@@ -274,7 +274,7 @@ toursSchema.post(/^find/, function(docs) {
 //         { '$group': [Object] },
 //         { '$sort': [Object] }
 //       ],
-//       _model: Model { Tour },
+//       _models: models { Tour },
 //       options: {}
 //     }
 //     [
@@ -299,8 +299,8 @@ toursSchema.post(/^find/, function(docs) {
 //   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
 //   next();
 // });
-/** mongoDB Model */
-const Tour = new mongoose.model('Tour', toursSchema);
+/** mongoDB models */
+const Tour = new mongoose.models('Tour', toursSchema);
 
 module.exports = Tour;
 

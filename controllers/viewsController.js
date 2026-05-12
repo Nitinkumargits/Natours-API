@@ -1,8 +1,8 @@
-const Tour = require('../model/tourModel');
-const User = require('../model/userModel');
+const Tour = require('../models/tourmodels');
+const User = require('../models/usermodels');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
-const Booking = require('../model/bookingModel');
+const Booking = require('../models/bookingmodels');
 
 exports.alerts = (req, res, next) => {
   const { alert } = req.query;

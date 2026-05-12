@@ -3,7 +3,7 @@
 //Route-handler for Users
 const multer = require('multer');
 const sharp = require('sharp');
-const User = require('./../model/userModel');
+const User = require('./../models/usermodels');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const factory = require('./handlerFactory');

@@ -1,7 +1,7 @@
 # =========================
 # BUILD STAGE
 # =========================
-FROM node:18-alpine AS builder
+FROM node:16-alpine AS builder
 
 WORKDIR /app
 
@@ -9,11 +9,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install all dependencies (including dev dependencies for building)
-RUN npm config set registry https://registry.npmjs.org/ && \
-    npm config set fetch-retry-mintimeout 20000 && \
-    npm config set fetch-retry-maxtimeout 120000 && \
-    npm install --no-audit --no-fund --prefer-offline || \
-    (npm cache clean --force && npm install --no-audit --no-fund)
+RUN npm ci --no-audit --no-fund
 
 # Copy source code
 COPY . .
@@ -25,7 +21,7 @@ RUN npm run build:js
 # =========================
 # PRODUCTION STAGE
 # =========================
-FROM node:18-alpine
+FROM node:16-alpine
 
 WORKDIR /app
 
@@ -36,17 +32,13 @@ RUN apk add --no-cache dumb-init
 COPY package*.json ./
 
 # Install only production dependencies
-RUN npm config set registry https://registry.npmjs.org/ && \
-    npm config set fetch-retry-mintimeout 20000 && \
-    npm config set fetch-retry-maxtimeout 120000 && \
-    npm install --omit=dev --no-audit --no-fund --prefer-offline || \
-    (npm cache clean --force && npm install --omit=dev --no-audit --no-fund)
+RUN npm ci --omit=dev --no-audit --no-fund
 
 # Copy backend code
 COPY server.js ./
 COPY app.js ./
 COPY controllers ./controllers
-COPY model ./model
+COPY modelss ./modelss
 COPY routes ./routes
 COPY utils ./utils
 
@@ -64,9 +56,5 @@ ENV NODE_ENV=production
 
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "server.js"]
-
-EXPOSE 3000
-
-ENV NODE_ENV=production
 
 CMD ["dumb-init", "--", "node", "server.js"]

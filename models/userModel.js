@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-/** user Model */
+/** user models */
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const validator = require('validator');
@@ -201,7 +201,7 @@ userSchema.methods.createPasswordResetToken = function() {
 
   return resetToken;
 };
-/** model */
-const User = new mongoose.model('User', userSchema);
+/** models */
+const User = new mongoose.models('User', userSchema);
 
 module.exports = User;
