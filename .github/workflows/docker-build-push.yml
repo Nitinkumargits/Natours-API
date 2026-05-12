@@ -7,6 +7,8 @@ on:
 
 env:
   IMAGE_NAME: nitinkdocker18/natoursapi
+  DOMAIN: nitinkdevs.com
+  EMAIL: nitinkwork18@gmail.com
 
 jobs:
   build-and-push:
@@ -75,6 +77,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Copy Nginx config to EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: nginx/natours.conf
+          target: /home/${{ secrets.EC2_USER }}/
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
         with:
@@ -85,32 +99,77 @@ jobs:
             set -e
 
             IMAGE_TAG=${{ needs.build-and-push.outputs.image_version }}
+            DOMAIN="${{ env.DOMAIN }}"
+            EMAIL="${{ env.EMAIL }}"
+            IMAGE="${{ env.IMAGE_NAME }}"
 
+            # ── 1. Install Nginx and Certbot if missing ──────────────────
+            if ! command -v nginx &>/dev/null; then
+              echo "📦 Installing Nginx..."
+              sudo apt-get update -y
+              sudo apt-get install -y nginx certbot python3-certbot-nginx
+              sudo systemctl enable nginx
+              sudo systemctl start nginx
+            fi
+
+            # ── 2. Install Docker if missing ─────────────────────────────
+            if ! command -v docker &>/dev/null; then
+              echo "📦 Installing Docker..."
+              sudo apt-get update -y
+              sudo apt-get install -y docker.io
+              sudo systemctl enable docker
+              sudo systemctl start docker
+              sudo usermod -aG docker $USER
+            fi
+
+            # ── 3. Ensure env file directory exists ──────────────────────
+            sudo mkdir -p /opt/natours
+
+            # ── 4. Sync Nginx config ─────────────────────────────────────
+            echo "🔧 Updating Nginx config..."
+            sudo cp ~/nginx/natours.conf /etc/nginx/sites-available/natours
+            sudo ln -sf /etc/nginx/sites-available/natours /etc/nginx/sites-enabled/natours
+            sudo rm -f /etc/nginx/sites-enabled/default
+            sudo nginx -t
+
+            # ── 5. Obtain SSL cert (only on first deploy) ─────────────────
+            if [ ! -d /etc/letsencrypt/live/$DOMAIN ]; then
+              echo "🔒 Obtaining SSL certificate..."
+              sudo certbot --nginx \
+                --non-interactive \
+                --agree-tos \
+                --email "$EMAIL" \
+                -d "$DOMAIN" \
+                -d "www.$DOMAIN"
+            else
+              echo "✅ SSL certificate already exists, skipping Certbot."
+              sudo systemctl reload nginx
+            fi
+
+            # ── 6. Pull and run Docker container ─────────────────────────
             echo "🐳 Pulling image: $IMAGE_TAG"
-            docker pull ${{ env.IMAGE_NAME }}:$IMAGE_TAG
+            sudo docker pull $IMAGE:$IMAGE_TAG
 
             echo "🛑 Stopping old container..."
-            docker stop app || true
-            docker rm app || true
+            sudo docker stop app || true
+            sudo docker rm app || true
 
             echo "🚀 Starting new container..."
-            docker run -d \
+            sudo docker run -d \
               --name app \
               --restart always \
               -p 127.0.0.1:3000:3000 \
               --env-file /opt/natours/prod.env \
-              ${{ env.IMAGE_NAME }}:$IMAGE_TAG
+              $IMAGE:$IMAGE_TAG
 
             echo "⏳ Waiting for app to start..."
             sleep 15
 
+            # ── 7. Health check ───────────────────────────────────────────
             echo "🏥 Running health check..."
             curl -f http://localhost:3000 || exit 1
 
-            echo "🔄 Reloading Nginx..."
-            sudo nginx -t && sudo systemctl reload nginx
-
             echo "🧹 Cleaning unused images..."
-            docker image prune -af
+            sudo docker image prune -af
 
-            echo "✅ Deployment successful!"
+            echo "✅ Deployment successful! Live at https://$DOMAIN"
