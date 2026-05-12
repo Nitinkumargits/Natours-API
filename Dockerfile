@@ -35,7 +35,6 @@ COPY controllers ./controllers
 COPY models ./models
 COPY routes ./routes
 COPY utils ./utils
-COPY prod.env ./prod.env
 
 # Copy views (PUG templates)
 COPY views ./views
