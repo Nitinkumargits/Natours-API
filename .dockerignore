@@ -5,6 +5,8 @@ npm-debug.log
 README.md
 .env
 .env.local
+prod.env
+*.env
 .cache
 .parcel-cache
 dist
