@@ -21,7 +21,35 @@ const app = express();
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: [
+          "'self'",
+          'https://api.mapbox.com',
+          'https://js.stripe.com',
+        ],
+        scriptSrcElem: [
+          "'self'",
+          'https://api.mapbox.com',
+          'https://js.stripe.com',
+        ],
+        styleSrc: ["'self'", 'https://api.mapbox.com', "'unsafe-inline'"],
+        workerSrc: ["'self'", 'blob:'],
+        connectSrc: [
+          "'self'",
+          'https://*.mapbox.com',
+          'https://api.stripe.com',
+          'ws://localhost:*',
+        ],
+        imgSrc: ["'self'", 'data:', 'blob:'],
+        frameSrc: ["'self'", 'https://js.stripe.com'],
+      },
+    },
+  })
+);
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }

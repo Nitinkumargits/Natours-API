@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 
 /**Catching uncaught Exception(top of code ) */
-process.on('uncaughtException', err => {
+process.on('uncaughtException', (err) => {
   console.log('Uncaught Exception shutting down ....');
   console.log(err.name, err.message);
   //we really need to crach our application,because after there was an uncaught expection the entire node process is so called un-clean state
@@ -25,7 +25,10 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true,
-    useFindAndModify: false
+    useFindAndModify: false,
+    authSource: 'admin',
+    replicaSet: 'atlas-qa10n3-shard-0',
+    ssl: true,
   })
   .then(() => {
     console.log('DB connection succesfull :💽💾💾💾');
@@ -33,7 +36,7 @@ mongoose
       console.log(`App start at port : ${port} 🚀🚀🚀`);
     });
   })
-  .catch(err => {
+  .catch((err) => {
     console.log('DB connection error:', err.message);
     process.exit(1);
   });
@@ -42,7 +45,7 @@ mongoose
 /**
  Each time that there is unhandle rejection somewhere in our application,the process-obj  will emit an object called unhandle rejection,so that we can subscribe to that event
  */
-process.on('unhandledRejection', err => {
+process.on('unhandledRejection', (err) => {
   console.log(err.name, err.message); //MongoError bad auth :
   console.log('Unhandle Rejection 😥😥😥,Shuting down application');
 

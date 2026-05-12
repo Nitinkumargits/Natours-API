@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"require\\('dns'\\).resolveTxt\\('natures-app.po4fctj.mongodb.net', \\(e,r\\) => console.log\\('TXT:', e||JSON.stringify\\(r\\)\\)\\)\")",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //F //PID 8)"
+    ]
+  }
+}

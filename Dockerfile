@@ -8,6 +8,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
+# Install dependencies (including dev deps for building)
+RUN npm install
 
 # Copy source code
 COPY . .
@@ -26,6 +28,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
+# Install production dependencies only
+RUN npm install --omit=dev
 
 # Copy backend code
 COPY server.js ./
