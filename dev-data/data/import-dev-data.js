@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const fs = require('fs');
-// const Tour = require('./../../models/tourmodels');
-// const Review = require('./../../models/reviewmodels');
-const User = require('./../../models/usermodels');
+// const Tour = require('./../../models/tourModel');
+// const Review = require('./../../models/reviewModel');
+const User = require('./../../models/userModel');
 
 dotenv.config({ path: './prod.env' });
 

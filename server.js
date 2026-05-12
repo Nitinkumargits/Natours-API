@@ -17,42 +17,35 @@ const app = require('./app');
 /** connection string for mongoose i.e DB */
 const DB = process.env.DATABASE;
 
-/** mongoose.connect() is return a promise so we have to hanndle the promise using then() which have access to connection object which is con,con is the resolve value of promise
- * {
-    // useNewUrlParser: true,
-    // useCreateIndex: true,
-    // useFindAndModify: false,
-    // useUnifiedTopology: true
-  }
- * 
- * 
-*/
-mongoose
-  .connect(DB)
-  .then(() => console.log('DB connection succesfull :💽💾💾💾'));
-
-/**------StartServer------------------------------*/
 const port = process.env.PORT || 3000;
+let server;
 
-const server = app.listen(port, '0.0.0.0', () => {
-  console.log(`App start at port : ${port} 🚀🚀🚀`);
-});
+mongoose
+  .connect(DB, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+    useFindAndModify: false
+  })
+  .then(() => {
+    console.log('DB connection succesfull :💽💾💾💾');
+    server = app.listen(port, '0.0.0.0', () => {
+      console.log(`App start at port : ${port} 🚀🚀🚀`);
+    });
+  })
+  .catch(err => {
+    console.log('DB connection error:', err.message);
+    process.exit(1);
+  });
 
 /** Globally handle Unhandle rejected promises */
 /**
  Each time that there is unhandle rejection somewhere in our application,the process-obj  will emit an object called unhandle rejection,so that we can subscribe to that event
  */
 process.on('unhandledRejection', err => {
-  console.log(err.name, err.message); //MongoError bad auth : authentication failed
-  /**if you have Promblem with DB so just exit the programm/shutDown the application */
-  /**
-   code zero stands for success
-   one stands for uncaught exceptions
-   */
+  console.log(err.name, err.message); //MongoError bad auth :
   console.log('Unhandle Rejection 😥😥😥,Shuting down application');
-  /**
-    server.close() we giving server,time to finish all request that are still pending or begin handle all the time,aft that the server basically closed
-   */
+
   server.close(() => {
     process.exit(1);
   });

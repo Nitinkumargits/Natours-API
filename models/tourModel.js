@@ -300,7 +300,7 @@ toursSchema.post(/^find/, function(docs) {
 //   next();
 // });
 /** mongoDB models */
-const Tour = new mongoose.models('Tour', toursSchema);
+const Tour = mongoose.model('Tour', toursSchema);
 
 module.exports = Tour;
 
