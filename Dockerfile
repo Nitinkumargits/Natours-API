@@ -42,10 +42,9 @@ COPY utils ./utils
 # Copy views (PUG templates)
 COPY views ./views
 
-# Copy static assets and built frontend
+# Copy static assets and built frontend bundle
 COPY public ./public
-COPY --from=builder /app/public/dist ./public/dist
-COPY --from=builder /app/public/js ./public/js
+COPY --from=builder /app/public/dist/index.js ./public/js/bundle.js
 
 EXPOSE 3000
 
