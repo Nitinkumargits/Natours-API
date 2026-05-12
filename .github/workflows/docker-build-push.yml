@@ -280,10 +280,23 @@ jobs:
               --env-file /opt/natours/prod.env \
               $IMAGE:$IMAGE_TAG
 
-            sleep 15
-
-            # ── 7. Health check ───────────────────────────────────────────
-            curl -f http://localhost:3000 || exit 1
+            # ── 7. Health check with retry ────────────────────────────────
+            echo "Waiting for app to be ready..."
+            for i in {1..30}; do
+              if curl -fs http://localhost:3000 > /dev/null; then
+                echo "App is healthy"
+                break
+              fi
+              if [ $i -eq 30 ]; then
+                echo "Health check failed after 60s. Container logs:"
+                sudo docker ps -a
+                sudo docker logs app --tail 100
+                echo "Container env (first 5 lines, no secrets):"
+                sudo head -5 /opt/natours/prod.env | sed 's/=.*/=***/'
+                exit 1
+              fi
+              sleep 2
+            done
             sudo docker image prune -af
             echo "Deployment successful! Live at https://$DOMAIN"
           ENDSSH
