@@ -219,7 +219,14 @@ jobs:
               sudo usermod -aG docker ubuntu
             fi
 
-            # ── 3. Ensure env file directory exists ──────────────────────
+            # ── 3. Write env file from GitHub secret ─────────────────────
+            sudo mkdir -p /opt/natours
+            sudo tee /opt/natours/prod.env > /dev/null <<'PRODENV'
+          ${{ secrets.PROD_ENV }}
+          PRODENV
+            sudo chmod 600 /opt/natours/prod.env
+
+            # ── 3b. Ensure env file directory exists ─────────────────────
             sudo mkdir -p /opt/natours
 
             # ── 4. Write Nginx config ────────────────────────────────────
