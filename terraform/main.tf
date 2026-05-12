@@ -98,12 +98,6 @@ resource "aws_default_security_group" "natours-sg" {
   }
 }
 
-# ── Key Pair ──────────────────────────────────────────────────────────────────
-
-resource "aws_key_pair" "natours-key" {
-  key_name   = var.key_pair_name
-  public_key = var.ec2_public_key
-}
 
 # ── AMI (Ubuntu 22.04 LTS) ────────────────────────────────────────────────────
 
@@ -133,9 +127,17 @@ resource "aws_instance" "natours-server" {
   availability_zone      = var.avail_zone
 
   associate_public_ip_address = true
-  key_name                    = aws_key_pair.natours-key.key_name
 
-  user_data = file("${path.module}/entry-script.sh")
+  user_data = <<-USERDATA
+    #!/bin/bash
+    set -e
+    mkdir -p /home/ubuntu/.ssh
+    echo '${var.ec2_public_key}' >> /home/ubuntu/.ssh/authorized_keys
+    chmod 700 /home/ubuntu/.ssh
+    chmod 600 /home/ubuntu/.ssh/authorized_keys
+    chown -R ubuntu:ubuntu /home/ubuntu/.ssh
+    ${file("${path.module}/entry-script.sh")}
+  USERDATA
 
   tags = {
     Name = "${var.env_prefix}-server"
