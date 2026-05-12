@@ -135,12 +135,18 @@ jobs:
             # ── 5. Obtain SSL cert (only on first deploy) ─────────────────
             if [ ! -d /etc/letsencrypt/live/$DOMAIN ]; then
               echo "🔒 Obtaining SSL certificate..."
-              sudo certbot --nginx \
+              if sudo certbot --nginx \
                 --non-interactive \
                 --agree-tos \
                 --email "$EMAIL" \
                 -d "$DOMAIN" \
-                -d "www.$DOMAIN"
+                -d "www.$DOMAIN"; then
+                echo "✅ SSL certificate obtained successfully."
+              else
+                echo "⚠️  Certbot failed — DNS not ready yet. App will run on HTTP."
+                echo "⚠️  Push again once DNS is propagated to get SSL."
+                sudo systemctl reload nginx
+              fi
             else
               echo "✅ SSL certificate already exists, skipping Certbot."
               sudo systemctl reload nginx
