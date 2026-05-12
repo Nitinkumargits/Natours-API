@@ -25,14 +25,9 @@ FROM node:16-alpine
 
 WORKDIR /app
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
-
 # Copy package files
 COPY package*.json ./
 
-# Install only production dependencies
-RUN npm install --omit=dev --no-audit --no-fund
 
 # Copy backend code
 COPY server.js ./
@@ -54,5 +49,4 @@ EXPOSE 3000
 
 ENV NODE_ENV=production
 
-ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "server.js"]
