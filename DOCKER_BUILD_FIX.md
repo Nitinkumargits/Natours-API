@@ -3,6 +3,7 @@
 ## Problem: npm install failing during Docker build
 
 ### Root Causes:
+
 1. **Network timeouts** - npm registry connection issues
 2. **Outdated dependencies** - Some packages in package.json are very old
 3. **Cache corruption** - npm cache issues
@@ -11,6 +12,7 @@
 ### Fixes Applied:
 
 #### 1. **Improved npm install with retry logic**
+
 ```dockerfile
 RUN npm config set registry https://registry.npmjs.org/ && \
     npm config set fetch-retry-mintimeout 20000 && \
@@ -20,11 +22,13 @@ RUN npm config set registry https://registry.npmjs.org/ && \
 ```
 
 #### 2. **Used Alpine Linux consistently**
+
 - Changed from `node:18-slim` back to `node:18-alpine`
 - Removed unnecessary `apt-get` installations
 - Smaller image size, faster builds
 
 #### 3. **Optimized build process**
+
 - Used `npm ci` instead of `npm install` for reproducible builds
 - Added `--no-audit --no-fund --prefer-offline` flags
 - Proper multi-stage build with selective file copying
@@ -32,25 +36,31 @@ RUN npm config set registry https://registry.npmjs.org/ && \
 ### If Build Still Fails:
 
 #### Option 1: Clear Docker cache and rebuild
+
 ```bash
 docker system prune -a
 docker build --no-cache -t natours:latest .
 ```
 
 #### Option 2: Update outdated dependencies
+
 Some packages are very old and may need updating:
+
 - `mongoose`: ^5.5.2 → ^8.0.0 (major version jump, may need code changes)
 - `express`: ^4.16.4 → ^4.18.0
 - `helmet`: ^3.16.0 → ^7.0.0
 - `stripe`: ^7.0.0 → ^14.0.0
 
 #### Option 3: Use different Node version
+
 If compatibility issues persist, try Node 16:
+
 ```dockerfile
 FROM node:16-alpine AS builder
 ```
 
 #### Option 4: Manual npm install with verbose logging
+
 ```bash
 # Test locally first
 npm config set registry https://registry.npmjs.org/
@@ -75,6 +85,7 @@ curl http://localhost:3000
 ```
 
 ### Environment Variables Required:
+
 ```bash
 NODE_ENV=production
 DATABASE=mongodb+srv://user:pass@cluster.mongodb.net/db

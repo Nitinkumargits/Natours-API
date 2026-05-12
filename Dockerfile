@@ -46,7 +46,7 @@ RUN npm config set registry https://registry.npmjs.org/ && \
 COPY server.js ./
 COPY app.js ./
 COPY controllers ./controllers
-COPY models ./models
+COPY model ./model
 COPY routes ./routes
 COPY utils ./utils
 
