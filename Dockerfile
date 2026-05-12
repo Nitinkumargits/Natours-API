@@ -1,4 +1,6 @@
-# Build stage
+# =========================
+# BUILD STAGE
+# =========================
 FROM node:18-alpine AS builder
 
 WORKDIR /app
@@ -8,11 +10,13 @@ RUN npm install
 
 COPY . .
 
-# Build JS bundle
+# Build frontend bundle
 RUN npm run build:js
 
 
-# Production stage
+# =========================
+# PRODUCTION STAGE
+# =========================
 FROM node:18-alpine
 
 WORKDIR /app
@@ -20,14 +24,30 @@ WORKDIR /app
 RUN apk add --no-cache dumb-init
 
 COPY package*.json ./
-RUN npm install --only=production
 
-# copy FULL app INCLUDING built bundle
-COPY --from=builder /app ./
+# Install only production deps
+RUN npm install --omit=dev
+
+# Copy backend code
+COPY server.js ./
+COPY app.js ./
+COPY controllers ./controllers
+COPY models ./models
+COPY routes ./routes
+COPY utils ./utils
+COPY prod.env ./prod.env
+
+# Copy views (PUG templates)
+COPY views ./views
+
+# Copy static assets and built frontend
+COPY public ./public
+COPY --from=builder /app/public/dist ./public/dist
+COPY --from=builder /app/public/js ./public/js
 
 EXPOSE 3000
 
 ENV NODE_ENV=production
 
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["npm", "start"]
+CMD ["node", "server.js"]
