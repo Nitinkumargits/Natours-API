@@ -226,9 +226,18 @@ jobs:
 
             # ── 3. Write env file from GitHub secret ─────────────────────
             sudo mkdir -p /opt/natours
-            echo "${PROD_ENV_B64}" | base64 -d | sudo tee /opt/natours/prod.env > /dev/null
-            sudo chmod 600 /opt/natours/prod.env
-            echo "Env file written, $(sudo wc -l < /opt/natours/prod.env) lines"
+            DECODED=$(echo "${PROD_ENV_B64}" | base64 -d)
+            if [ -z "$DECODED" ] || [ "$(echo "$DECODED" | wc -l)" -lt 3 ]; then
+              echo "WARNING: PROD_ENV secret is empty or too short. Keeping existing /opt/natours/prod.env"
+              if [ ! -f /opt/natours/prod.env ]; then
+                echo "ERROR: No existing prod.env and secret is empty. Aborting."
+                exit 1
+              fi
+            else
+              echo "$DECODED" | sudo tee /opt/natours/prod.env > /dev/null
+              sudo chmod 600 /opt/natours/prod.env
+              echo "Env file written, $(sudo wc -l < /opt/natours/prod.env) lines"
+            fi
 
             # ── 3b. Ensure env file directory exists ─────────────────────
             sudo mkdir -p /opt/natours
