@@ -38,7 +38,7 @@ RUN npm ci --omit=dev --no-audit --no-fund
 COPY server.js ./
 COPY app.js ./
 COPY controllers ./controllers
-COPY modelss ./modelss
+COPY models ./models
 COPY routes ./routes
 COPY utils ./utils
 
