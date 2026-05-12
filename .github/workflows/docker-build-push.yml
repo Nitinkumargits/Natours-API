@@ -225,7 +225,7 @@ jobs:
 
             # ── 3. Write env file from GitHub secret ─────────────────────
             sudo mkdir -p /opt/natours
-            DECODED=$(echo "${PROD_ENV_B64}" | base64 -d)
+            DECODED=$(echo "${PROD_ENV_B64}" | tr -d ' \n\r\t' | base64 -d 2>/dev/null || echo "")
             if [ -z "$DECODED" ] || [ "$(echo "$DECODED" | wc -l)" -lt 3 ]; then
               echo "WARNING: PROD_ENV secret is empty or too short. Keeping existing /opt/natours/prod.env"
               if [ ! -f /opt/natours/prod.env ]; then
