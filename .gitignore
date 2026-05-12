@@ -6,4 +6,7 @@ kp_*
 
 # Terraform
 terraform/.terraform/
+terraform/.terraform.lock.hcl
 *.tfvars
+terraform/tfplan
+terraform/*.tfstate.backup
