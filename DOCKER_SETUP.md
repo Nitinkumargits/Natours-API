@@ -125,8 +125,8 @@ EOF
 chmod 600 /opt/natours/prod.env
 
 # Install Docker if not already installed
-sudo yum update -y
-sudo yum install docker -y
+sudo apt update -y
+sudo apt  install docker -y
 sudo systemctl start docker
 sudo usermod -a -G docker ec2-user
 
