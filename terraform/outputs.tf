@@ -6,3 +6,11 @@ output "ec2_public_ip" {
 output "ec2_public_dns" {
   value = aws_instance.natours-server.public_dns
 }
+
+output "ec2_instance_id" {
+  value = aws_instance.natours-server.id
+}
+
+output "ec2_availability_zone" {
+  value = aws_instance.natours-server.availability_zone
+}

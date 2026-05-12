@@ -89,6 +89,8 @@ jobs:
 
     outputs:
       ec2_ip: ${{ steps.ip.outputs.ip }}
+      ec2_id: ${{ steps.ip.outputs.id }}
+      ec2_az: ${{ steps.ip.outputs.az }}
 
     steps:
       - name: Checkout code
@@ -130,12 +132,12 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
 
-      - name: Output EC2 IP
+      - name: Output EC2 info
         id: ip
         run: |
           echo "ip=$(terraform output -raw ec2_public_ip)" >> $GITHUB_OUTPUT
-          echo "Waiting for EC2 SSH to become available..."
-          sleep 50
+          echo "id=$(terraform output -raw ec2_instance_id)" >> $GITHUB_OUTPUT
+          echo "az=$(terraform output -raw ec2_availability_zone)" >> $GITHUB_OUTPUT
 
       - name: Commit state to GitHub
         run: |
@@ -152,7 +154,12 @@ jobs:
 
     env:
       HOST: ${{ needs.terraform.outputs.ec2_ip || secrets.EC2_HOST }}
+      INSTANCE_ID: ${{ needs.terraform.outputs.ec2_id }}
+      INSTANCE_AZ: ${{ needs.terraform.outputs.ec2_az }}
       IMAGE_TAG: ${{ needs.build-and-push.outputs.image_version }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-1
 
     steps:
       - name: Setup SSH key
@@ -160,10 +167,30 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
+          ssh-keygen -y -f ~/.ssh/deploy_key > ~/.ssh/deploy_key.pub
           echo "Key fingerprint: $(ssh-keygen -lf ~/.ssh/deploy_key)"
+
+      - name: Wait for SSH to be reachable
+        run: |
+          for i in {1..30}; do
+            if nc -z -w 5 "$HOST" 22; then
+              echo "SSH port reachable"
+              break
+            fi
+            echo "Waiting for SSH... ($i/30)"
+            sleep 10
+          done
           ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -v \
-            ${{ secrets.EC2_USER }}@"$HOST" "echo SSH_OK" 2>&1 | tail -20
+
+      - name: Push key via EC2 Instance Connect
+        if: env.INSTANCE_ID != ''
+        run: |
+          aws ec2-instance-connect send-ssh-public-key \
+            --instance-id "$INSTANCE_ID" \
+            --availability-zone "$INSTANCE_AZ" \
+            --instance-os-user ubuntu \
+            --ssh-public-key "file://$HOME/.ssh/deploy_key.pub"
+          echo "Key pushed via EC2 Instance Connect (valid for 60s)"
 
       - name: Deploy to EC2
         run: |
