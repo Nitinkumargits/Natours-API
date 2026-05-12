@@ -14,6 +14,8 @@ COPY routes ./routes
 COPY utils ./utils
 COPY views ./views
 COPY public ./public
+ 
+
 
 EXPOSE 3000
 
