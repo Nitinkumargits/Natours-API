@@ -1,29 +1,69 @@
+# =========================
+# BUILD STAGE
+# =========================
 FROM node:18-alpine AS builder
 
 WORKDIR /app
 
+# Copy package files
 COPY package*.json ./
-RUN npm install
 
+# Install dependencies with retry logic and cache optimization
+RUN npm config set registry https://registry.npmjs.org/ && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm ci --only=production --no-audit --no-fund --prefer-offline --no-optional || \
+    (npm cache clean --force && npm ci --only=production --no-audit --no-fund --no-optional)
+
+# Copy source code
 COPY . .
+
+# Build frontend assets
 RUN npm run build:js
 
 
-FROM node:18-slim
+# =========================
+# PRODUCTION STAGE
+# =========================
+FROM node:18-alpine
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    python3 \
-    make \
-    g++ \
-    dumb-init \
- && rm -rf /var/lib/apt/lists/*
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
 
+# Copy package files
 COPY package*.json ./
-RUN npm install --omit=dev
 
-COPY --from=builder /app ./
+# Install only production dependencies with retry logic
+RUN npm config set registry https://registry.npmjs.org/ && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm ci --omit=dev --no-audit --no-fund --prefer-offline --no-optional || \
+    (npm cache clean --force && npm ci --omit=dev --no-audit --no-fund --no-optional)
+
+# Copy backend code
+COPY server.js ./
+COPY app.js ./
+COPY controllers ./controllers
+COPY models ./models
+COPY routes ./routes
+COPY utils ./utils
+
+# Copy views (PUG templates)
+COPY views ./views
+
+# Copy static assets and built frontend
+COPY public ./public
+COPY --from=builder /app/public/dist ./public/dist
+COPY --from=builder /app/public/js ./public/js
+
+EXPOSE 3000
+
+ENV NODE_ENV=production
+
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["node", "server.js"]
 
 EXPOSE 3000
 
