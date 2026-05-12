@@ -8,8 +8,6 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install all dependencies (including dev dependencies for building)
-RUN npm install --no-audit --no-fund
 
 # Copy source code
 COPY . .
