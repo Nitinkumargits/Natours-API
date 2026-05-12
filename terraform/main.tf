@@ -150,17 +150,19 @@ data "aws_route53_zone" "natours" {
 }
 
 resource "aws_route53_record" "natours-a" {
-  zone_id = data.aws_route53_zone.natours.zone_id
-  name    = var.domain
-  type    = "A"
-  ttl     = 300
-  records = [aws_instance.natours-server.public_ip]
+  zone_id         = data.aws_route53_zone.natours.zone_id
+  name            = var.domain
+  type            = "A"
+  ttl             = 300
+  records         = [aws_instance.natours-server.public_ip]
+  allow_overwrite = true
 }
 
 resource "aws_route53_record" "natours-www" {
-  zone_id = data.aws_route53_zone.natours.zone_id
-  name    = "www.${var.domain}"
-  type    = "A"
-  ttl     = 300
-  records = [aws_instance.natours-server.public_ip]
+  zone_id         = data.aws_route53_zone.natours.zone_id
+  name            = "www.${var.domain}"
+  type            = "A"
+  ttl             = 300
+  records         = [aws_instance.natours-server.public_ip]
+  allow_overwrite = true
 }

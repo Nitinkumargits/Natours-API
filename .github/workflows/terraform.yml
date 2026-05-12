@@ -42,6 +42,16 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
+      - name: Import existing resources into state
+        run: |
+          ZONE_ID=$(aws route53 list-hosted-zones-by-name \
+            --dns-name nitinkdevs.com \
+            --query "HostedZones[0].Id" \
+            --output text | sed 's|/hostedzone/||')
+          terraform import aws_instance.natours-server i-0c69628c0f8e1904d || true
+          terraform import aws_route53_record.natours-a "${ZONE_ID}_nitinkdevs.com_A" || true
+          terraform import aws_route53_record.natours-www "${ZONE_ID}_www.nitinkdevs.com_A" || true
+
       - name: Terraform Plan
         run: terraform plan -out=tfplan
 
