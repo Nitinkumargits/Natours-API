@@ -8,12 +8,12 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies with retry logic and cache optimization
+# Install all dependencies (including dev dependencies for building)
 RUN npm config set registry https://registry.npmjs.org/ && \
     npm config set fetch-retry-mintimeout 20000 && \
     npm config set fetch-retry-maxtimeout 120000 && \
-    npm ci --only=production --no-audit --no-fund --prefer-offline --no-optional || \
-    (npm cache clean --force && npm ci --only=production --no-audit --no-fund --no-optional)
+    npm install --no-audit --no-fund --prefer-offline || \
+    (npm cache clean --force && npm install --no-audit --no-fund)
 
 # Copy source code
 COPY . .
@@ -35,12 +35,12 @@ RUN apk add --no-cache dumb-init
 # Copy package files
 COPY package*.json ./
 
-# Install only production dependencies with retry logic
+# Install only production dependencies
 RUN npm config set registry https://registry.npmjs.org/ && \
     npm config set fetch-retry-mintimeout 20000 && \
     npm config set fetch-retry-maxtimeout 120000 && \
-    npm ci --omit=dev --no-audit --no-fund --prefer-offline --no-optional || \
-    (npm cache clean --force && npm ci --omit=dev --no-audit --no-fund --no-optional)
+    npm install --omit=dev --no-audit --no-fund --prefer-offline || \
+    (npm cache clean --force && npm install --omit=dev --no-audit --no-fund)
 
 # Copy backend code
 COPY server.js ./
