@@ -194,10 +194,9 @@ jobs:
 
       - name: Deploy to EC2
         env:
-          PROD_ENV: ${{ secrets.PROD_ENV }}
+          PROD_ENV_B64: ${{ secrets.PROD_ENV_B64 }}
         run: |
-          PROD_ENV_B64=$(printf '%s' "$PROD_ENV" | base64 -w 0)
-          echo "Encoded env file length: ${#PROD_ENV_B64} chars (raw $(printf '%s' "$PROD_ENV" | wc -l) lines)"
+          echo "Encoded env secret length: ${#PROD_ENV_B64} chars"
           ssh -i ~/.ssh/deploy_key ${{ secrets.EC2_USER }}@"$HOST" \
             "PROD_ENV_B64='$PROD_ENV_B64' bash -s" << 'ENDSSH'
             set -e
