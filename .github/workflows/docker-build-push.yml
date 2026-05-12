@@ -194,7 +194,9 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          ssh -i ~/.ssh/deploy_key ${{ secrets.EC2_USER }}@"$HOST" bash << 'ENDSSH'
+          PROD_ENV_B64=$(printf '%s' "${{ secrets.PROD_ENV }}" | base64 -w 0)
+          ssh -i ~/.ssh/deploy_key ${{ secrets.EC2_USER }}@"$HOST" \
+            "PROD_ENV_B64='$PROD_ENV_B64' bash -s" << 'ENDSSH'
             set -e
 
             IMAGE_TAG="${{ env.IMAGE_TAG }}"
@@ -221,10 +223,9 @@ jobs:
 
             # ── 3. Write env file from GitHub secret ─────────────────────
             sudo mkdir -p /opt/natours
-            sudo tee /opt/natours/prod.env > /dev/null <<'PRODENV'
-          ${{ secrets.PROD_ENV }}
-          PRODENV
+            echo "${PROD_ENV_B64}" | base64 -d | sudo tee /opt/natours/prod.env > /dev/null
             sudo chmod 600 /opt/natours/prod.env
+            echo "Env file written, $(sudo wc -l < /opt/natours/prod.env) lines"
 
             # ── 3b. Ensure env file directory exists ─────────────────────
             sudo mkdir -p /opt/natours
