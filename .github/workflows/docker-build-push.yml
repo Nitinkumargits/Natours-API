@@ -125,7 +125,10 @@ jobs:
 
       - name: Output EC2 IP
         id: ip
-        run: echo "ip=$(terraform output -raw ec2_public_ip)" >> $GITHUB_OUTPUT
+        run: |
+          echo "ip=$(terraform output -raw ec2_public_ip)" >> $GITHUB_OUTPUT
+          echo "Waiting for EC2 SSH to become available..."
+          sleep 50
 
       - name: Commit state to GitHub
         run: |
@@ -137,7 +140,7 @@ jobs:
           git push
 
   deploy:
-    needs: [terraform, build-and-push]
+    needs: [terraform]
     runs-on: ubuntu-latest
 
     steps:
