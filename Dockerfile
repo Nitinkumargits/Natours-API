@@ -9,7 +9,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install all dependencies (including dev dependencies for building)
-RUN npm ci --no-audit --no-fund
+RUN npm install --no-audit --no-fund
 
 # Copy source code
 COPY . .
@@ -32,7 +32,7 @@ RUN apk add --no-cache dumb-init
 COPY package*.json ./
 
 # Install only production dependencies
-RUN npm ci --omit=dev --no-audit --no-fund
+RUN npm install --omit=dev --no-audit --no-fund
 
 # Copy backend code
 COPY server.js ./
@@ -56,5 +56,3 @@ ENV NODE_ENV=production
 
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "server.js"]
-
-CMD ["dumb-init", "--", "node", "server.js"]
