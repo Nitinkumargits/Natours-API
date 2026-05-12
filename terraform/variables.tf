@@ -35,7 +35,3 @@ variable "my_ip" {
   sensitive   = true
 }
 
-variable "ec2_public_key" {
-  description = "SSH public key content (id_rsa.pub) to install on the EC2 instance"
-  sensitive   = true
-}
