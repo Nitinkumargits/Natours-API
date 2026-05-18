@@ -905,8 +905,12 @@ const logout = async ()=>{
             method: 'GET',
             url: '/api/v1/users/logout'
         });
-        res.data.status = 'success';
-        location.reload(true);
+        if (res.data.status === 'success') {
+            (0, _alerts.showAlert)('error', 'Logged out successfully!');
+            window.setTimeout(()=>{
+                location.assign('/');
+            }, 1500);
+        }
     } catch (err) {
         console.log(err.response);
         (0, _alerts.showAlert)('error', 'Error logging out! Try again.');
