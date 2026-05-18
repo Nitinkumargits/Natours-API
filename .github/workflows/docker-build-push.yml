@@ -76,15 +76,36 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      HOST: ${{ secrets.EC2_HOST }}
-      INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
-      INSTANCE_AZ: ${{ secrets.EC2_INSTANCE_AZ }}
       IMAGE_TAG: ${{ needs.build-and-push.outputs.image_version }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_DEFAULT_REGION: ap-south-1
 
     steps:
+      - name: Discover EC2 instance by tag
+        id: ec2
+        run: |
+          INFO=$(aws ec2 describe-instances \
+            --filters "Name=tag:Name,Values=prod-server" \
+                      "Name=instance-state-name,Values=running" \
+            --query 'Reservations[].Instances[].[PublicIpAddress,InstanceId,Placement.AvailabilityZone]' \
+            --output text | head -1)
+
+          if [ -z "$INFO" ] || [ "$INFO" = "None" ]; then
+            echo "::error::No running EC2 instance with tag Name=prod-server found in $AWS_DEFAULT_REGION."
+            echo "::error::Run the 'Terraform Apply' workflow first to provision infra."
+            exit 1
+          fi
+
+          HOST=$(echo "$INFO" | awk '{print $1}')
+          INSTANCE_ID=$(echo "$INFO" | awk '{print $2}')
+          INSTANCE_AZ=$(echo "$INFO" | awk '{print $3}')
+
+          echo "Discovered EC2: $INSTANCE_ID @ $HOST ($INSTANCE_AZ)"
+          echo "HOST=$HOST"                 >> $GITHUB_ENV
+          echo "INSTANCE_ID=$INSTANCE_ID"   >> $GITHUB_ENV
+          echo "INSTANCE_AZ=$INSTANCE_AZ"   >> $GITHUB_ENV
+
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
@@ -106,7 +127,6 @@ jobs:
           ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: Push key via EC2 Instance Connect
-        if: env.INSTANCE_ID != ''
         run: |
           aws ec2-instance-connect send-ssh-public-key \
             --instance-id "$INSTANCE_ID" \
