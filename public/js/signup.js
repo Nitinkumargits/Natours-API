@@ -12,8 +12,8 @@ export const signup = async (name, email, password, passwordConfirm) => {
         name: name,
         email: email,
         password: password,
-        passwordConfirm: passwordConfirm
-      }
+        passwordConfirm: passwordConfirm,
+      },
     });
     if (res.data.status === 'success') {
       showAlert('success', 'Account created successfully');
