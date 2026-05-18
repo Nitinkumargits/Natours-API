@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       confirm:
-        description: 'Type "destroy" to confirm'
+        description: 'Type "destroy" to confirm tearing down ALL Natours infra (VPC, EC2, security group, Route 53 records). Cannot be undone.'
         required: true
 
 jobs:
@@ -16,19 +16,15 @@ jobs:
       run:
         working-directory: terraform
 
-    permissions:
-      contents: write
-
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-1
       TF_VAR_my_ip: ${{ secrets.MY_IP }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Derive public key from EC2_SSH_KEY
         run: |
@@ -49,11 +45,16 @@ jobs:
       - name: Terraform Destroy
         run: terraform destroy -auto-approve
 
-      - name: Commit cleared state to GitHub
+      - name: Done
         run: |
-          cd $GITHUB_WORKSPACE
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add terraform/terraform.tfstate
-          git diff --staged --quiet || git commit -m "chore: terraform destroy — state cleared [skip ci]"
-          git push
+          echo "─────────────────────────────────────────────────────"
+          echo "All Natours infra has been destroyed."
+          echo ""
+          echo "What's still there (intentionally preserved):"
+          echo "  • S3 bucket  nitinkdevs-tf-state          (stores state — bootstrap infra)"
+          echo "  • DynamoDB   terraform-state-lock         (state lock — bootstrap infra)"
+          echo "  • Route 53   nitinkdevs.com hosted zone   (your root domain)"
+          echo ""
+          echo "To nuke the bootstrap too, delete the bucket and table"
+          echo "manually in the AWS console after this run."
+          echo "─────────────────────────────────────────────────────"
