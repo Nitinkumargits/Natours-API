@@ -2345,3 +2345,27 @@ textarea.admin-form__input {
 .btn--white:hover {
   background: #f7f7f7;
 }
+
+.btn--red {
+  background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 0 0.4rem 1.2rem rgba(214, 48, 49, 0.3);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+.btn--red:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0.6rem 1.6rem rgba(214, 48, 49, 0.4);
+  filter: brightness(1.05);
+}
+
+.admin-modal__dialog--sm {
+  max-width: 42rem;
+}
+
+.admin-confirm__message {
+  font-size: 1.5rem;
+  color: #444;
+  margin: 0;
+  line-height: 1.5;
+}

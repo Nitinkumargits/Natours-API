@@ -21,6 +21,21 @@ html
     // FOOTER
     include _footer
 
+    // SHARED CONFIRM MODAL
+    .admin-modal.hidden#admin-confirm(aria-hidden='true')
+      .admin-modal__backdrop.js-admin-confirm-cancel
+      .admin-modal__dialog.admin-modal__dialog--sm(role='alertdialog', aria-modal='true', aria-labelledby='admin-confirm-title')
+        .admin-modal__head
+          h3.admin-modal__title#admin-confirm-title Are you sure?
+          button.admin-modal__close.js-admin-confirm-cancel(type='button', aria-label='Close')
+            svg
+              use(xlink:href='/img/icons.svg#icon-x')
+        .admin-modal__body
+          p.admin-confirm__message#admin-confirm-message
+        .admin-modal__foot
+          button.btn.btn--white.js-admin-confirm-cancel(type='button') Cancel
+          button.btn.btn--red#admin-confirm-ok(type='button') Delete
+
     // SHARED ADMIN MODAL
     .admin-modal.hidden#admin-modal(aria-hidden='true')
       .admin-modal__backdrop.js-admin-modal-close

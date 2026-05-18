@@ -116,6 +116,41 @@
     );
   }
 
+  // ---- Confirm dialog ----
+  var confirmEl = document.getElementById('admin-confirm');
+  var confirmTitle = document.getElementById('admin-confirm-title');
+  var confirmMsg = document.getElementById('admin-confirm-message');
+  var confirmOk = document.getElementById('admin-confirm-ok');
+  var confirmResolver = null;
+
+  function openConfirm(opts) {
+    if (!confirmEl) return Promise.resolve(window.confirm(opts.message));
+    confirmTitle.textContent = opts.title || 'Are you sure?';
+    confirmMsg.textContent = opts.message || '';
+    confirmOk.textContent = opts.okText || 'Delete';
+    confirmEl.classList.remove('hidden');
+    confirmEl.setAttribute('aria-hidden', 'false');
+    setTimeout(function () { confirmOk.focus(); }, 0);
+    return new Promise(function (resolve) {
+      confirmResolver = resolve;
+    });
+  }
+
+  function closeConfirm(result) {
+    if (!confirmEl) return;
+    confirmEl.classList.add('hidden');
+    confirmEl.setAttribute('aria-hidden', 'true');
+    if (confirmResolver) {
+      var r = confirmResolver;
+      confirmResolver = null;
+      r(!!result);
+    }
+  }
+
+  if (confirmOk) {
+    confirmOk.addEventListener('click', function () { closeConfirm(true); });
+  }
+
   var state = { resource: null, id: null, mode: 'edit' };
 
   var modal = document.getElementById('admin-modal');
@@ -201,19 +236,31 @@
       var id = target.dataset.id;
       var schema = SCHEMAS[resource];
       if (!schema) return;
-      if (!window.confirm('Delete this ' + schema.label + '? This cannot be undone.')) return;
-      axios
-        .delete(schema.apiPath + '/' + id)
-        .then(function () {
-          showAlert('success', schema.label[0].toUpperCase() + schema.label.slice(1) + ' deleted.');
-          removeRow(resource, id);
-        })
-        .catch(function (err) {
-          var msg =
-            (err.response && err.response.data && err.response.data.message) ||
-            'Delete failed.';
-          showAlert('error', msg);
-        });
+      openConfirm({
+        title: 'Delete ' + schema.label + '?',
+        message:
+          'Delete this ' + schema.label + '? This cannot be undone.',
+        okText: 'Delete',
+      }).then(function (ok) {
+        if (!ok) return;
+        axios
+          .delete(schema.apiPath + '/' + id)
+          .then(function () {
+            showAlert(
+              'success',
+              schema.label[0].toUpperCase() +
+                schema.label.slice(1) +
+                ' deleted.'
+            );
+            removeRow(resource, id);
+          })
+          .catch(function (err) {
+            var msg =
+              (err.response && err.response.data && err.response.data.message) ||
+              'Delete failed.';
+            showAlert('error', msg);
+          });
+      });
       return;
     }
 
@@ -245,11 +292,21 @@
       closeModal();
       return;
     }
+
+    if (target.classList.contains('js-admin-confirm-cancel')) {
+      e.preventDefault();
+      closeConfirm(false);
+      return;
+    }
   });
 
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
-      closeModal();
+    if (e.key === 'Escape') {
+      if (confirmEl && !confirmEl.classList.contains('hidden')) {
+        closeConfirm(false);
+      } else if (modal && !modal.classList.contains('hidden')) {
+        closeModal();
+      }
     }
   });
 
