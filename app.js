@@ -55,7 +55,10 @@ app.use(
           "'self'",
           'https://*.mapbox.com',
           'https://api.stripe.com',
-          'ws://localhost:*',
+          'https://cdnjs.cloudflare.com',
+          ...(process.env.NODE_ENV === 'production'
+            ? []
+            : ['ws://localhost:*', 'ws://127.0.0.1:*']),
         ],
         imgSrc: [
           "'self'",
