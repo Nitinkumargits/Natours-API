@@ -32,18 +32,36 @@ block content
             h2.heading-secondary My reviews
 
           if reviews && reviews.length
-            .my-reviews
+            .card-container.card-container--compact
               each r in reviews
-                article.my-review-card
-                  if r.tour && r.tour.imageCover
-                    a(href=`/tour/${r.tour.slug}`)
-                      img.my-review-card__img(src=`/img/tours/${r.tour.imageCover}`, alt=r.tour.name)
-                  .my-review-card__body
-                    .my-review-card__head
-                      a.my-review-card__tour(href=`/tour/${r.tour.slug}`)= r.tour ? r.tour.name : 'Tour removed'
-                      span.rating-pill= `${r.rating} / 5`
-                    p.my-review-card__text= r.review
-                    p.my-review-card__date= new Date(r.createdAt).toLocaleDateString('en-us', {month: 'long', day: 'numeric', year: 'numeric'})
+                .card
+                  .card__header
+                    .card__picture
+                      .card__picture-overlay &nbsp;
+                      if r.tour && r.tour.imageCover
+                        img.card__picture-img(src=`/img/tours/${r.tour.imageCover}`, alt=`${r.tour.name}`)
+                    h3.heading-tertirary
+                      span= r.tour ? r.tour.name : 'Tour removed'
+
+                  .card__details
+                    h4.card__sub-heading= `Rating ${r.rating} / 5`
+                    p.card__text= r.review
+                    .card__data
+                      svg.card__icon
+                        use(xlink:href='/img/icons.svg#icon-calendar')
+                      span= new Date(r.createdAt).toLocaleDateString('en-us', {month: 'long', day: 'numeric', year: 'numeric'})
+                    .card__data
+                      svg.card__icon
+                        use(xlink:href='/img/icons.svg#icon-star')
+                      span= `${r.rating} / 5`
+
+                  .card__footer
+                    p
+                      span.card__footer-value= `${r.rating}`
+                      |
+                      span.card__footer-text rating
+                    if r.tour && r.tour.slug
+                      a.btn.btn--green.btn--small(href=`/tour/${r.tour.slug}`) View tour
           else
             .empty-state
               svg.empty-state__icon
