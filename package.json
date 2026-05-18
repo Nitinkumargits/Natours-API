@@ -7,7 +7,7 @@
     "dev": "nodemon server.js",
     "start:prod": "NODE_ENV=production nodemon server.js",
     "debug": "ndb server.js",
-    "watch:js": "parcel watch ./public/js/index.js --dist-dir ./public/js --no-cache",
+    "watch:js": "parcel watch ./public/js/index.js --dist-dir ./public/dist --no-cache",
     "build:js": "parcel build ./public/js/index.js --dist-dir ./public/dist --no-source-maps"
   },
   "author": "Jonas Schmedtmann",

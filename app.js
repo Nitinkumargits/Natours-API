@@ -19,6 +19,10 @@ const bookingController = require('./controllers/bookingController');
 
 const app = express();
 
+// Trust the first proxy hop (nginx in front of the Node process) so
+// req.secure and req.ip reflect the original client connection.
+app.set('trust proxy', 1);
+
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
