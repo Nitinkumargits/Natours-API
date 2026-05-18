@@ -22,6 +22,8 @@ router.get('/resetpassword/:token', viewsController.renderResetPasswordForm);
 router.get('/me', authController.protect, viewsController.getAccount);
 
 router.get('/my-tours', authController.protect, viewsController.getMyTours);
+router.get('/my-reviews', authController.protect, viewsController.getMyReviews);
+router.get('/my-billing', authController.protect, viewsController.getMyBilling);
 
 router.post(
   '/submit-user-data',

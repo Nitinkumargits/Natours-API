@@ -133,6 +133,34 @@ exports.getManageBookings = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.getMyReviews = catchAsync(async (req, res, next) => {
+  const reviews = await Review.find({ user: req.user.id })
+    .populate({ path: 'tour', select: 'name slug imageCover' })
+    .sort('-createdAt');
+
+  res.status(200).render('myReviews', {
+    title: 'My reviews',
+    reviews
+  });
+});
+
+exports.getMyBilling = catchAsync(async (req, res, next) => {
+  const bookings = await Booking.find({ user: req.user.id }).sort(
+    '-createdAt'
+  );
+
+  const total = bookings.reduce(
+    (sum, b) => sum + (b.paid ? b.price : 0),
+    0
+  );
+
+  res.status(200).render('myBilling', {
+    title: 'Billing',
+    bookings,
+    total
+  });
+});
+
 exports.getMyTours = catchAsync(async (req, res, next) => {
   // 1) Find all bookings made by that specific user
   const bookings = await Booking.find({

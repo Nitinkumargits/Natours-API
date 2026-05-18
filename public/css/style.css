@@ -2369,3 +2369,130 @@ textarea.admin-form__input {
   margin: 0;
   line-height: 1.5;
 }
+
+/* ===== My reviews ===== */
+.my-reviews {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(28rem, 1fr));
+  gap: 2rem;
+}
+.my-review-card {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1.2rem 3rem rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.my-review-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 1.6rem 4rem rgba(0, 0, 0, 0.1);
+}
+.my-review-card__img {
+  width: 100%;
+  height: 14rem;
+  object-fit: cover;
+  display: block;
+}
+.my-review-card__body {
+  padding: 1.6rem 1.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  flex: 1;
+}
+.my-review-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.my-review-card__tour {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #28b487;
+  text-decoration: none;
+}
+.my-review-card__tour:hover {
+  text-decoration: underline;
+}
+.my-review-card__text {
+  font-size: 1.4rem;
+  color: #555;
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.my-review-card__date {
+  font-size: 1.2rem;
+  color: #999;
+  margin: 0;
+  margin-top: auto;
+}
+
+/* ===== Billing ===== */
+.billing-summary {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+.billing-summary__stat {
+  flex: 1;
+  min-width: 18rem;
+  background: linear-gradient(135deg, #7dd56f 0%, #28b487 100%);
+  color: #fff;
+  border-radius: 10px;
+  padding: 2rem 2.4rem;
+  box-shadow: 0 0.8rem 2rem rgba(40, 180, 135, 0.25);
+}
+.billing-summary__stat:nth-child(2) {
+  background: linear-gradient(135deg, #5f9ee2 0%, #2b6cb0 100%);
+  box-shadow: 0 0.8rem 2rem rgba(43, 108, 176, 0.25);
+}
+.billing-summary__label {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  opacity: 0.9;
+  margin-bottom: 0.4rem;
+}
+.billing-summary__value {
+  display: block;
+  font-size: 2.8rem;
+  font-weight: 700;
+}
+
+/* ===== Empty state ===== */
+.empty-state {
+  text-align: center;
+  padding: 5rem 2rem;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1.2rem 3rem rgba(0, 0, 0, 0.04);
+}
+.empty-state__icon {
+  height: 5rem;
+  width: 5rem;
+  fill: #ccc;
+  margin-bottom: 1.5rem;
+}
+.empty-state__title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #444;
+  margin: 0 0 0.8rem;
+}
+.empty-state__text {
+  font-size: 1.4rem;
+  color: #888;
+  max-width: 40rem;
+  margin: 0 auto 2rem;
+  line-height: 1.5;
+}

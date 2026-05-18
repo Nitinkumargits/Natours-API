@@ -1,0 +1,65 @@
+extends base
+
+mixin navItem(link, text, icon, active)
+  li(class=`${active ? 'side-nav--active' : ''}`)
+    a(href=`${link}`)
+      svg
+        use(xlink:href=`/img/icons.svg#icon-${icon}`)
+      | #{text}
+
+block content
+  main.main
+    .user-view
+      nav.user-view__menu
+        ul.side-nav
+          +navItem('/me', 'Settings', 'settings')
+          +navItem('/my-tours', 'My bookings', 'briefcase')
+          +navItem('/my-reviews', 'My reviews', 'star')
+          +navItem('/my-billing', 'Billing', 'credit-card', true)
+
+        - if (user && user.role === 'admin')
+          .admin-nav
+            h5.admin-nav__heading Admin
+            ul.side-nav
+              +navItem('/manage-tours', 'Manage tours', 'map')
+              +navItem('/manage-users', 'Manage users', 'users')
+              +navItem('/manage-reviews', 'Manage reviews', 'star')
+              +navItem('/manage-bookings', 'Manage bookings', 'briefcase')
+
+      .user-view__content
+        .manage-page
+          .manage-page__header
+            h2.heading-secondary Billing
+
+          if bookings && bookings.length
+            .billing-summary
+              .billing-summary__stat
+                span.billing-summary__label Total paid
+                span.billing-summary__value= `$${total}`
+              .billing-summary__stat
+                span.billing-summary__label Bookings
+                span.billing-summary__value= bookings.length
+
+            .manage-table-wrap
+              table.manage-table
+                thead
+                  tr
+                    th Tour
+                    th Date
+                    th Amount
+                    th Status
+                tbody
+                  each b in bookings
+                    tr
+                      td= b.tour && b.tour.name ? b.tour.name : '—'
+                      td= new Date(b.createdAt).toLocaleDateString('en-us', {month: 'short', day: 'numeric', year: 'numeric'})
+                      td= `$${b.price}`
+                      td
+                        span(class=`role-badge ${b.paid ? 'role-badge--user' : 'role-badge--admin'}`)= b.paid ? 'Paid' : 'Unpaid'
+          else
+            .empty-state
+              svg.empty-state__icon
+                use(xlink:href='/img/icons.svg#icon-credit-card')
+              h3.empty-state__title No billing history
+              p.empty-state__text You haven't booked any tours yet.
+              a.btn.btn--green(href='/') Browse tours

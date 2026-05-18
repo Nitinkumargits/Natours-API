@@ -1,0 +1,53 @@
+extends base
+
+mixin navItem(link, text, icon, active)
+  li(class=`${active ? 'side-nav--active' : ''}`)
+    a(href=`${link}`)
+      svg
+        use(xlink:href=`/img/icons.svg#icon-${icon}`)
+      | #{text}
+
+block content
+  main.main
+    .user-view
+      nav.user-view__menu
+        ul.side-nav
+          +navItem('/me', 'Settings', 'settings')
+          +navItem('/my-tours', 'My bookings', 'briefcase')
+          +navItem('/my-reviews', 'My reviews', 'star', true)
+          +navItem('/my-billing', 'Billing', 'credit-card')
+
+        - if (user && user.role === 'admin')
+          .admin-nav
+            h5.admin-nav__heading Admin
+            ul.side-nav
+              +navItem('/manage-tours', 'Manage tours', 'map')
+              +navItem('/manage-users', 'Manage users', 'users')
+              +navItem('/manage-reviews', 'Manage reviews', 'star')
+              +navItem('/manage-bookings', 'Manage bookings', 'briefcase')
+
+      .user-view__content
+        .manage-page
+          .manage-page__header
+            h2.heading-secondary My reviews
+
+          if reviews && reviews.length
+            .my-reviews
+              each r in reviews
+                article.my-review-card
+                  if r.tour && r.tour.imageCover
+                    a(href=`/tour/${r.tour.slug}`)
+                      img.my-review-card__img(src=`/img/tours/${r.tour.imageCover}`, alt=r.tour.name)
+                  .my-review-card__body
+                    .my-review-card__head
+                      a.my-review-card__tour(href=`/tour/${r.tour.slug}`)= r.tour ? r.tour.name : 'Tour removed'
+                      span.rating-pill= `${r.rating} / 5`
+                    p.my-review-card__text= r.review
+                    p.my-review-card__date= new Date(r.createdAt).toLocaleDateString('en-us', {month: 'long', day: 'numeric', year: 'numeric'})
+          else
+            .empty-state
+              svg.empty-state__icon
+                use(xlink:href='/img/icons.svg#icon-star')
+              h3.empty-state__title No reviews yet
+              p.empty-state__text You haven't written any reviews. Book and complete a tour, then share your experience.
+              a.btn.btn--green(href='/') Explore tours
