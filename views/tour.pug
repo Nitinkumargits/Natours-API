@@ -73,9 +73,40 @@ block content
     #map(data-locations=JSON.stringify(tour.locations))
 
   section.section-reviews
+    .section-reviews__header
+      if user
+        button.btn-write-review#toggle-review-form(type='button', aria-label='Write a review')
+          svg.btn-write-review__icon
+            use(xlink:href='/img/icons.svg#icon-edit-3')
+          span.btn-write-review__label Write a Review
+          span.btn-write-review__stars(aria-hidden='true')
+            each star in [1, 2, 3, 4, 5]
+              svg.btn-write-review__star
+                use(xlink:href='/img/icons.svg#icon-star')
     .reviews
       each review in tour.reviews
         +reviewCard(review)
+
+    if user
+      .review-form-container.hidden#review-form-container
+        h2.heading-secondary.ma-bt-md Share your experience
+        form.form.review-form#review-form(data-tour-id=`${tour.id}`)
+          .form__group
+            label.form__label(for='review-text') Your review
+            textarea.form__input#review-text(rows='4', placeholder='Tell us about your tour...', required)
+          .form__group
+            label.form__label Your rating
+            .review-form__rating#review-rating(data-rating='0')
+              each star in [1, 2, 3, 4, 5]
+                svg.review-form__star(data-value=star)
+                  use(xlink:href='/img/icons.svg#icon-star')
+          .form__group
+            button.btn.btn--green(type='submit') Submit review
+    else
+      .review-form-container
+        p.review-form__login
+          a(href='/login') Log in
+          |  to write a review
 
   section.section-cta
     .cta

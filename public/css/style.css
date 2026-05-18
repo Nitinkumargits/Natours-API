@@ -675,6 +675,203 @@ body {
   fill: #bbb;
 }
 
+.section-reviews__header {
+  display: flex;
+  justify-content: flex-end;
+  max-width: 120rem;
+  margin: 0 auto;
+  padding: 2rem 4rem 0 4rem;
+}
+
+.btn-write-review {
+  --brand-1: #7dd56f;
+  --brand-2: #28b487;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.2rem 2.4rem;
+  font-family: inherit;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--brand-1) 0%, var(--brand-2) 100%);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: 0 0.4rem 1.2rem rgba(40, 180, 135, 0.35),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, padding 0.25s ease;
+}
+
+.btn-write-review::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #28b487 0%, #1f8f6c 100%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 0;
+}
+
+.btn-write-review > * {
+  position: relative;
+  z-index: 1;
+}
+
+.btn-write-review__icon {
+  height: 1.8rem;
+  width: 1.8rem;
+  fill: currentColor;
+  stroke: currentColor;
+  transition: transform 0.35s ease;
+}
+
+.btn-write-review__label {
+  white-space: nowrap;
+}
+
+.btn-write-review__stars {
+  display: inline-flex;
+  align-items: center;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-width 0.35s ease, opacity 0.25s ease, margin-left 0.25s ease;
+}
+
+.btn-write-review__star {
+  height: 1.6rem;
+  width: 1.6rem;
+  margin-left: 2px;
+  fill: #ffd76b;
+  stroke: #ffd76b;
+  transform: scale(0.6);
+  opacity: 0;
+  transition: transform 0.35s ease, opacity 0.35s ease;
+}
+
+.btn-write-review:hover,
+.btn-write-review:focus-visible {
+  outline: none;
+  transform: translateY(-2px);
+  box-shadow: 0 0.8rem 2rem rgba(40, 180, 135, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+.btn-write-review:hover::before,
+.btn-write-review:focus-visible::before {
+  opacity: 1;
+}
+
+.btn-write-review:hover .btn-write-review__icon {
+  transform: rotate(-12deg) scale(1.1);
+}
+
+.btn-write-review:hover .btn-write-review__stars,
+.btn-write-review:focus-visible .btn-write-review__stars {
+  max-width: 12rem;
+  opacity: 1;
+  margin-left: 0.4rem;
+}
+
+.btn-write-review:hover .btn-write-review__star,
+.btn-write-review:focus-visible .btn-write-review__star {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.btn-write-review:hover .btn-write-review__star:nth-child(1) { transition-delay: 0.02s; }
+.btn-write-review:hover .btn-write-review__star:nth-child(2) { transition-delay: 0.08s; }
+.btn-write-review:hover .btn-write-review__star:nth-child(3) { transition-delay: 0.14s; }
+.btn-write-review:hover .btn-write-review__star:nth-child(4) { transition-delay: 0.2s; }
+.btn-write-review:hover .btn-write-review__star:nth-child(5) { transition-delay: 0.26s; }
+
+.btn-write-review:active {
+  transform: translateY(0);
+  box-shadow: 0 0.3rem 0.8rem rgba(40, 180, 135, 0.4),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 56.25em) {
+  .btn-write-review {
+    padding: 1rem 2rem;
+    font-size: 1.3rem;
+  }
+  .btn-write-review__icon {
+    height: 1.6rem;
+    width: 1.6rem;
+  }
+  .btn-write-review:hover .btn-write-review__stars,
+  .btn-write-review:focus-visible .btn-write-review__stars {
+    max-width: 9rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-write-review,
+  .btn-write-review *,
+  .btn-write-review::before {
+    transition: none !important;
+  }
+}
+
+.hidden {
+  display: none !important;
+}
+
+.review-form-container {
+  grid-column: 1 / -1;
+  max-width: 60rem;
+  margin: 4rem auto 0 auto;
+  padding: 3rem 4rem;
+  background-color: #f7f7f7;
+  border-radius: 3px;
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.1);
+}
+
+.review-form .form__group {
+  margin-bottom: 2rem;
+}
+
+.review-form textarea.form__input {
+  width: 100%;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 1.5rem;
+  padding: 1.25rem 1.75rem;
+}
+
+.review-form__rating {
+  display: flex;
+  cursor: pointer;
+}
+
+.review-form__star {
+  height: 2.5rem;
+  width: 2.5rem;
+  margin-right: 4px;
+  fill: #bbb;
+  transition: fill 0.15s;
+}
+
+.review-form__star--active {
+  fill: #55c57a;
+}
+
+.review-form__login {
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.review-form__login a {
+  color: #55c57a;
+  text-decoration: none;
+  font-weight: 700;
+}
+
 .section-cta {
   margin-top: calc(0px - var(--section-rotate));
   padding: 3rem;

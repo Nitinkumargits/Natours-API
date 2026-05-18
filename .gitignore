@@ -10,3 +10,7 @@ terraform/.terraform.lock.hcl
 *.tfvars
 terraform/tfplan
 terraform/*.tfstate.backup
+
+.claude
+.cache/
+.parcel-cache/
