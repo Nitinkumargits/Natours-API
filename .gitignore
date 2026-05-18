@@ -8,6 +8,8 @@ kp_*
 public/dist/
 public/js/bundle.js
 public/js/bundle.js.map
+public/js/index.js.map
+.parcel-cache/
 
 # Terraform
 terraform/.terraform/
