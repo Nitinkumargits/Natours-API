@@ -10,6 +10,9 @@ exports.alerts = (req, res, next) => {
   if (alert === 'booking') {
     res.locals.alert =
       'Your booking was successful ! If your booking does not show up here immediatly, please come back later.';
+  } else if (alert === 'booking_failed') {
+    res.locals.alert =
+      'Booking could not be completed. Please try again later or contact support.';
   }
   next();
 };

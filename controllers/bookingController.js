@@ -8,44 +8,52 @@ const catchAsync = require('../utils/catchAsync');
 
 // Checkout session.
 exports.getCheckoutSession = catchAsync(async (req, res, next) => {
-  // 1) Get the currently booked tour
   const tour = await Tour.findById(req.params.tourId);
-  // Use the forwarded protocol (https from the CDN/proxy) when available,
-  // so Stripe success/cancel URLs stay on https instead of falling back to
-  // http via req.protocol.
+  if (!tour) {
+    return res.redirect('/?alert=booking_failed');
+  }
+
+  // Prefer X-Forwarded-Proto (set by the CDN/proxy) so success/cancel URLs
+  // stay on https even if Node sees the local hop as http.
   const forwardedProto = req.headers['x-forwarded-proto'];
   const protocol =
     (typeof forwardedProto === 'string' && forwardedProto.split(',')[0]) ||
     req.protocol;
   const host = req.get('host');
-  // 2) Create checkout session
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
-    success_url: `${protocol}://${host}/my-tours?alert=booking`,
-    cancel_url: `${protocol}://${host}/tour/${tour.slug}`,
-    customer_email: req.user.email,
-    client_reference_id: req.params.tourId,
-    line_items: [
-      {
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: `${tour.name} Tour`,
-            description: tour.summary,
-            images: [
-              `${protocol}://${host}/img/tours/${tour.imageCover}`,
-            ],
+
+  let session;
+  try {
+    session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      success_url: `${protocol}://${host}/my-tours?alert=booking`,
+      cancel_url: `${protocol}://${host}/tour/${tour.slug}`,
+      customer_email: req.user.email,
+      client_reference_id: req.params.tourId,
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: `${tour.name} Tour`,
+              description: tour.summary,
+              images: [
+                `${protocol}://${host}/img/tours/${tour.imageCover}`,
+              ],
+            },
+            unit_amount: tour.price * 100,
           },
-          unit_amount: tour.price * 100,
+          quantity: 1,
         },
-        quantity: 1,
-      },
-    ],
-    mode: 'payment',
-  });
-  // 3) Redirect the browser straight to Stripe-hosted Checkout.
-  // Top-level navigation (vs. XHR) reliably sends the auth cookie, so
-  // this path is robust regardless of SameSite/CORS edge cases.
+      ],
+      mode: 'payment',
+    });
+  } catch (err) {
+    // Never leak Stripe internals (incl. partial secret key) to the
+    // client. Log server-side and redirect with a generic alert.
+    console.error('Stripe checkout session creation failed:', err.message);
+    return res.redirect(`/tour/${tour.slug}?alert=booking_failed`);
+  }
+
   return res.redirect(303, session.url);
 });
 
