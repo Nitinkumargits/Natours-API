@@ -1,0 +1,54 @@
+extends base
+
+include _adminSideNav
+
+block content
+  main.main
+    .user-view
+      +adminSideNav('bookings')
+      .user-view__content
+        .manage-page
+          .manage-page__header
+            h2.heading-secondary Manage bookings
+            button.btn.btn--green.btn--small.js-admin-create(
+              data-resource='bookings'
+            ) + Create booking
+
+          .manage-table-wrap
+            table.manage-table
+              thead
+                tr
+                  th Tour
+                  th User
+                  th Price
+                  th Paid
+                  th Created
+                  th Actions
+              tbody
+                if bookings && bookings.length
+                  each b in bookings
+                    tr(data-id=`${b._id}`)
+                      td= b.tour && b.tour.name ? b.tour.name : '—'
+                      td= b.user && b.user.name ? b.user.name : '—'
+                      td= `$${b.price}`
+                      td= b.paid ? 'Yes' : 'No'
+                      td= new Date(b.createdAt).toLocaleDateString('en-us', {month: 'short', day: 'numeric', year: 'numeric'})
+                      td.manage-table__actions
+                        button.btn-icon.js-admin-edit(
+                          data-resource='bookings',
+                          data-id=`${b._id}`,
+                          data-payload=JSON.stringify({price: b.price, paid: b.paid}),
+                          aria-label='Edit'
+                        )
+                          svg
+                            use(xlink:href='/img/icons.svg#icon-edit-3')
+                        button.btn-icon.btn-icon--danger.js-admin-delete(
+                          data-resource='bookings',
+                          data-id=`${b._id}`,
+                          aria-label='Delete'
+                        )
+                          svg
+                            use(xlink:href='/img/icons.svg#icon-trash-2')
+                else
+                  tr
+                    td(colspan='6').manage-table__empty No bookings found.

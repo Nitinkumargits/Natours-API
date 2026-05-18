@@ -29,4 +29,30 @@ router.post(
   viewsController.updateUserData
 );
 
+// Admin-only view routes
+router.get(
+  '/manage-tours',
+  authController.protect,
+  authController.restrictTo('admin'),
+  viewsController.getManageTours
+);
+router.get(
+  '/manage-users',
+  authController.protect,
+  authController.restrictTo('admin'),
+  viewsController.getManageUsers
+);
+router.get(
+  '/manage-reviews',
+  authController.protect,
+  authController.restrictTo('admin'),
+  viewsController.getManageReviews
+);
+router.get(
+  '/manage-bookings',
+  authController.protect,
+  authController.restrictTo('admin'),
+  viewsController.getManageBookings
+);
+
 module.exports = router;

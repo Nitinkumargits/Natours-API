@@ -1,0 +1,56 @@
+extends base
+
+include _adminSideNav
+
+block content
+  main.main
+    .user-view
+      +adminSideNav('tours')
+      .user-view__content
+        .manage-page
+          .manage-page__header
+            h2.heading-secondary Manage tours
+            button.btn.btn--green.btn--small.js-admin-create(
+              data-resource='tours'
+            ) + Create tour
+
+          .manage-table-wrap
+            table.manage-table
+              thead
+                tr
+                  th Name
+                  th Price
+                  th Duration
+                  th Difficulty
+                  th Rating
+                  th Group
+                  th Actions
+              tbody
+                if tours && tours.length
+                  each t in tours
+                    tr(data-id=`${t._id}`)
+                      td= t.name
+                      td= `$${t.price}`
+                      td= `${t.duration}d`
+                      td= t.difficulty
+                      td= `${t.ratingsAverage} (${t.ratingsQuantity})`
+                      td= t.maxGroupSize
+                      td.manage-table__actions
+                        button.btn-icon.js-admin-edit(
+                          data-resource='tours',
+                          data-id=`${t._id}`,
+                          data-payload=JSON.stringify({name: t.name, price: t.price, duration: t.duration, difficulty: t.difficulty, maxGroupSize: t.maxGroupSize, summary: t.summary, description: t.description || ''}),
+                          aria-label='Edit'
+                        )
+                          svg
+                            use(xlink:href='/img/icons.svg#icon-edit-3')
+                        button.btn-icon.btn-icon--danger.js-admin-delete(
+                          data-resource='tours',
+                          data-id=`${t._id}`,
+                          aria-label='Delete'
+                        )
+                          svg
+                            use(xlink:href='/img/icons.svg#icon-trash-2')
+                else
+                  tr
+                    td(colspan='7').manage-table__empty No tours found.

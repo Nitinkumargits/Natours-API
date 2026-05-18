@@ -20,10 +20,26 @@ html
       
     // FOOTER
     include _footer
-    
+
+    // SHARED ADMIN MODAL
+    .admin-modal.hidden#admin-modal(aria-hidden='true')
+      .admin-modal__backdrop.js-admin-modal-close
+      .admin-modal__dialog(role='dialog', aria-modal='true', aria-labelledby='admin-modal-title')
+        .admin-modal__head
+          h3.admin-modal__title#admin-modal-title Edit
+          button.admin-modal__close.js-admin-modal-close(type='button', aria-label='Close')
+            svg
+              use(xlink:href='/img/icons.svg#icon-x')
+        form.admin-modal__form#admin-modal-form
+          .admin-modal__body#admin-modal-body
+          .admin-modal__foot
+            button.btn.btn--white.js-admin-modal-close(type='button') Cancel
+            button.btn.btn--green(type='submit')#admin-modal-submit Save
+
     script(src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js')
     script(src='/js/bundle.js')
     script(src='/js/reviewUI.js')
+    script(src='/js/adminUI.js')
     //- script(src='/js/signup.js')
     //- script(src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js')
     //- script(src='/js/login.js')

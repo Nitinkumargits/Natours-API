@@ -1,5 +1,6 @@
 const Tour = require('../models/tourModel');
 const User = require('../models/userModel');
+const Review = require('../models/reviewModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const Booking = require('../models/bookingModel');
@@ -94,6 +95,41 @@ exports.updateUserData = catchAsync(async (req, res, next) => {
   res.status(200).render('account', {
     title: 'Your account',
     user: updatedUser
+  });
+});
+
+exports.getManageTours = catchAsync(async (req, res, next) => {
+  const tours = await Tour.find().sort('-createAt');
+  res.status(200).render('manageTours', {
+    title: 'Manage tours',
+    tours
+  });
+});
+
+exports.getManageUsers = catchAsync(async (req, res, next) => {
+  const users = await User.find();
+  res.status(200).render('manageUsers', {
+    title: 'Manage users',
+    users
+  });
+});
+
+exports.getManageReviews = catchAsync(async (req, res, next) => {
+  const reviews = await Review.find().populate({
+    path: 'tour',
+    select: 'name'
+  });
+  res.status(200).render('manageReviews', {
+    title: 'Manage reviews',
+    reviews
+  });
+});
+
+exports.getManageBookings = catchAsync(async (req, res, next) => {
+  const bookings = await Booking.find().sort('-createdAt');
+  res.status(200).render('manageBookings', {
+    title: 'Manage bookings',
+    bookings
   });
 });
 

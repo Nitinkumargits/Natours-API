@@ -1,0 +1,36 @@
+mixin adminSideNav(active)
+  nav.user-view__menu
+    ul.side-nav
+      li
+        a(href='/me')
+          svg
+            use(xlink:href='/img/icons.svg#icon-settings')
+          | Settings
+      li
+        a(href='/my-tours')
+          svg
+            use(xlink:href='/img/icons.svg#icon-briefcase')
+          | My bookings
+    .admin-nav
+      h5.admin-nav__heading Admin
+      ul.side-nav
+        li(class=active === 'tours' ? 'side-nav--active' : '')
+          a(href='/manage-tours')
+            svg
+              use(xlink:href='/img/icons.svg#icon-map')
+            | Manage tours
+        li(class=active === 'users' ? 'side-nav--active' : '')
+          a(href='/manage-users')
+            svg
+              use(xlink:href='/img/icons.svg#icon-users')
+            | Manage users
+        li(class=active === 'reviews' ? 'side-nav--active' : '')
+          a(href='/manage-reviews')
+            svg
+              use(xlink:href='/img/icons.svg#icon-star')
+            | Manage reviews
+        li(class=active === 'bookings' ? 'side-nav--active' : '')
+          a(href='/manage-bookings')
+            svg
+              use(xlink:href='/img/icons.svg#icon-briefcase')
+            | Manage bookings

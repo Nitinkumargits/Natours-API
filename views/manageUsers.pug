@@ -1,0 +1,54 @@
+extends base
+
+include _adminSideNav
+
+block content
+  main.main
+    .user-view
+      +adminSideNav('users')
+      .user-view__content
+        .manage-page
+          .manage-page__header
+            h2.heading-secondary Manage users
+            span.manage-page__note (new users sign up via the signup form)
+
+          .manage-table-wrap
+            table.manage-table
+              thead
+                tr
+                  th Photo
+                  th Name
+                  th Email
+                  th Role
+                  th Active
+                  th Actions
+              tbody
+                if users && users.length
+                  each u in users
+                    tr(data-id=`${u._id}`)
+                      td
+                        img.manage-table__avatar(src=`/img/users/${u.photo || 'default.jpg'}`, alt=u.name)
+                      td= u.name
+                      td= u.email
+                      td
+                        span(class=`role-badge role-badge--${u.role}`)= u.role
+                      td= u.active === false ? 'No' : 'Yes'
+                      td.manage-table__actions
+                        button.btn-icon.js-admin-edit(
+                          data-resource='users',
+                          data-id=`${u._id}`,
+                          data-payload=JSON.stringify({name: u.name, email: u.email, role: u.role}),
+                          aria-label='Edit'
+                        )
+                          svg
+                            use(xlink:href='/img/icons.svg#icon-edit-3')
+                        button.btn-icon.btn-icon--danger.js-admin-delete(
+                          data-resource='users',
+                          data-id=`${u._id}`,
+                          aria-label='Delete'
+                        )
+                          svg
+                            use(xlink:href='/img/icons.svg#icon-trash-2')
+                else
+                  tr
+                    td(colspan='6').manage-table__empty No users found.

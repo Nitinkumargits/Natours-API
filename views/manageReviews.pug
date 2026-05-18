@@ -1,0 +1,50 @@
+extends base
+
+include _adminSideNav
+
+block content
+  main.main
+    .user-view
+      +adminSideNav('reviews')
+      .user-view__content
+        .manage-page
+          .manage-page__header
+            h2.heading-secondary Manage reviews
+
+          .manage-table-wrap
+            table.manage-table
+              thead
+                tr
+                  th Tour
+                  th User
+                  th Rating
+                  th Review
+                  th Actions
+              tbody
+                if reviews && reviews.length
+                  each r in reviews
+                    tr(data-id=`${r._id}`)
+                      td= r.tour && r.tour.name ? r.tour.name : '—'
+                      td= r.user && r.user.name ? r.user.name : '—'
+                      td
+                        span.rating-pill= `${r.rating} / 5`
+                      td.manage-table__review= r.review
+                      td.manage-table__actions
+                        button.btn-icon.js-admin-edit(
+                          data-resource='reviews',
+                          data-id=`${r._id}`,
+                          data-payload=JSON.stringify({review: r.review, rating: r.rating}),
+                          aria-label='Edit'
+                        )
+                          svg
+                            use(xlink:href='/img/icons.svg#icon-edit-3')
+                        button.btn-icon.btn-icon--danger.js-admin-delete(
+                          data-resource='reviews',
+                          data-id=`${r._id}`,
+                          aria-label='Delete'
+                        )
+                          svg
+                            use(xlink:href='/img/icons.svg#icon-trash-2')
+                else
+                  tr
+                    td(colspan='5').manage-table__empty No reviews found.
