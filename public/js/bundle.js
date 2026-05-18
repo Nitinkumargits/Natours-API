@@ -187,6 +187,11 @@
 
   globalObject[parcelRequireName] = newRequire;
 
+  // Register externally-loaded vendor libs (loaded via <script> in base.pug)
+  if (typeof globalObject.axios !== 'undefined') {
+    newRequire.register('axios', globalObject.axios);
+  }
+
   for (var i = 0; i < entry.length; i++) {
     newRequire(entry[i]);
   }
@@ -713,7 +718,7 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 }
 
 },{}],"1H6qW":[function(require,module,exports,__globalThis) {
-/* eslint-disable */ var _polyfill = require("@babel/polyfill");
+/* eslint-disable */ var _polyfill = {};
 var _mapbox = require("./mapbox");
 var _login = require("./login");
 var _signup = require("./signup");
