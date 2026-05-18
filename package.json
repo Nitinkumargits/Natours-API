@@ -8,7 +8,7 @@
     "start:prod": "NODE_ENV=production nodemon server.js",
     "debug": "ndb server.js",
     "watch:js": "parcel watch ./public/js/index.js --dist-dir ./public/dist --no-cache",
-    "build:js": "parcel build ./public/js/index.js --dist-dir ./public/dist --no-source-maps"
+    "build:js": "parcel build ./public/js/index.js --dist-dir ./public/dist --no-source-maps --no-cache"
   },
   "author": "Jonas Schmedtmann",
   "license": "ISC",
@@ -50,7 +50,6 @@
     "eslint-plugin-react": "^7.12.4",
     "nodemon": "^2.0.22",
     "parcel": "^2.0.1",
-    "parcel-bundler": "^1.12.3",
     "prettier": "^2.8.8"
   },
   "engines": {

@@ -3,11 +3,14 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+ENV NODE_ENV=production
+
 COPY package*.json ./
-RUN npm install
+# Parcel needs devDeps to build, so don't pass --omit=dev here.
+RUN npm install --include=dev
 
 COPY public ./public
-RUN npm run build:js
+RUN rm -rf .parcel-cache public/dist && npm run build:js
 
 # ── Stage 2: runtime ─────────────────────────────────────────────────────────
 FROM node:20-alpine
