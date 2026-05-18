@@ -22,3 +22,4 @@ terraform/*.tfstate.backup
 .claude
 .cache/
 .parcel-cache/
+prod.env.b64

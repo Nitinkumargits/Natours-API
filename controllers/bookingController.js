@@ -10,14 +10,19 @@ const catchAsync = require('../utils/catchAsync');
 exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   // 1) Get the currently booked tour
   const tour = await Tour.findById(req.params.tourId);
+  // Use the forwarded protocol (https from the CDN/proxy) when available,
+  // so Stripe success/cancel URLs stay on https instead of falling back to
+  // http via req.protocol.
+  const forwardedProto = req.headers['x-forwarded-proto'];
+  const protocol =
+    (typeof forwardedProto === 'string' && forwardedProto.split(',')[0]) ||
+    req.protocol;
+  const host = req.get('host');
   // 2) Create checkout session
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
-    // success_url: `${req.protocol}://${req.get('host')}/?tour=${
-    //   req.params.tourId
-    // }&user=${req.user.id}&price=${tour.price}`,
-    success_url: `${req.protocol}://${req.get('host')}/my-tours?alert=booking`,
-    cancel_url: `${req.protocol}://${req.get('host')}/tour/${tour.slug}`,
+    success_url: `${protocol}://${host}/my-tours?alert=booking`,
+    cancel_url: `${protocol}://${host}/tour/${tour.slug}`,
     customer_email: req.user.email,
     client_reference_id: req.params.tourId,
     line_items: [
@@ -28,9 +33,7 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
             name: `${tour.name} Tour`,
             description: tour.summary,
             images: [
-              `${req.protocol}://${req.get('host')}/img/tours/${
-                tour.imageCover
-              }`,
+              `${protocol}://${host}/img/tours/${tour.imageCover}`,
             ],
           },
           unit_amount: tour.price * 100,
@@ -40,11 +43,10 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
     ],
     mode: 'payment',
   });
-  // 3) Create session as response
-  res.status(200).json({
-    status: 'success',
-    session: session,
-  });
+  // 3) Redirect the browser straight to Stripe-hosted Checkout.
+  // Top-level navigation (vs. XHR) reliably sends the auth cookie, so
+  // this path is robust regardless of SameSite/CORS edge cases.
+  return res.redirect(303, session.url);
 });
 
 const createBookingCheckout = async (session) => {
