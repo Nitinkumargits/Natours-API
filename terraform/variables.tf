@@ -23,6 +23,10 @@ variable "instance_type" {
 }
 
 variable "domain" {
+  default = "natours.nitinkdevs.com"
+}
+
+variable "root_domain" {
   default = "nitinkdevs.com"
 }
 

@@ -4,7 +4,7 @@
 
 set -e
 
-DOMAIN="nitinkdevs.com"
+DOMAIN="natours.nitinkdevs.com"
 EMAIL="nitinkwork18@gmail.com"
 ENV_DIR="/opt/natours"
 

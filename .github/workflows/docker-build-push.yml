@@ -7,7 +7,7 @@ on:
 
 env:
   IMAGE_NAME: nitinkdocker18/natoursapi
-  DOMAIN: nitinkdevs.com
+  DOMAIN: natours.nitinkdevs.com
   EMAIL: nitinkwork18@gmail.com
 
 jobs:
@@ -123,8 +123,8 @@ jobs:
             --dns-name nitinkdevs.com \
             --query "HostedZones[0].Id" \
             --output text | sed 's|/hostedzone/||')
-          terraform import aws_route53_record.natours-a "${ZONE_ID}_nitinkdevs.com_A" 2>/dev/null || true
-          terraform import aws_route53_record.natours-www "${ZONE_ID}_www.nitinkdevs.com_A" 2>/dev/null || true
+          terraform import aws_route53_record.natours-a "${ZONE_ID}_natours.nitinkdevs.com_A" 2>/dev/null || true
+          terraform import aws_route53_record.natours-www "${ZONE_ID}_www.natours.nitinkdevs.com_A" 2>/dev/null || true
 
       - name: Terraform Plan
         run: terraform plan -out=tfplan
@@ -245,7 +245,7 @@ jobs:
             sudo tee /etc/nginx/sites-available/natours > /dev/null << 'NGINXCONF'
           server {
               listen 80;
-              server_name nitinkdevs.com www.nitinkdevs.com;
+              server_name natours.nitinkdevs.com www.natours.nitinkdevs.com;
 
               location / {
                   proxy_pass         http://localhost:3000;

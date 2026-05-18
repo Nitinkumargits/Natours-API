@@ -141,7 +141,7 @@ resource "aws_instance" "natours-server" {
 # ── Route 53 DNS ──────────────────────────────────────────────────────────────
 
 data "aws_route53_zone" "natours" {
-  name         = var.domain
+  name         = var.root_domain
   private_zone = false
 }
 

@@ -3,7 +3,7 @@
 ## Overview
 
 ```
-User → https://nitinkdevs.com (port 443)
+User → https://natours.nitinkdevs.com (port 443)
           ↓
        Nginx (SSL termination)
           ↓
@@ -17,7 +17,7 @@ User → https://nitinkdevs.com (port 443)
 ## Prerequisites
 
 - AWS EC2 instance (Ubuntu)
-- Domain registered on AWS Route 53 (`nitinkdevs.com`)
+- Root domain registered on AWS Route 53 (`nitinkdevs.com`) — this project uses subdomain `natours.nitinkdevs.com`
 - MongoDB Atlas cluster
 - Docker Hub account
 - GitHub repository with Actions enabled
@@ -26,16 +26,16 @@ User → https://nitinkdevs.com (port 443)
 
 ## Step 1 — Fix Domain (clientHold)
 
-If the domain status is `clientHold`, email verification was not completed.
+If the **root domain** `nitinkdevs.com` has status `clientHold`, email verification was not completed.
 
 1. Go to **Route 53 → Registered domains → nitinkdevs.com → Actions**
 2. Click **Resend verification email**
 3. Check inbox at `nitinkwork18@gmail.com` for email from `noreply@registrar.amazon.com`
 4. Click the verification link
-5. Wait 10–15 minutes, then verify:
+5. Wait 10–15 minutes, then verify the subdomain resolves:
 
 ```bash
-dig nitinkdevs.com +short
+dig natours.nitinkdevs.com +short
 # Should return: 13.126.7.60
 ```
 
@@ -47,8 +47,8 @@ Go to **Route 53 → Hosted zones → nitinkdevs.com** and ensure these records 
 
 | Name | Type | Value | TTL |
 |------|------|-------|-----|
-| nitinkdevs.com | A | `<EC2 public IP>` | 300 |
-| www.nitinkdevs.com | A | `<EC2 public IP>` | 300 |
+| natours.nitinkdevs.com | A | `<EC2 public IP>` | 300 |
+| www.natours.nitinkdevs.com | A | `<EC2 public IP>` | 300 |
 
 Get your EC2 public IP:
 ```bash
@@ -153,7 +153,7 @@ Browser → HTTPS (port 443) → Nginx → HTTP (port 3000) → Docker app
 
 ### Requirements before getting a certificate
 
-- Domain must resolve publicly: `dig nitinkdevs.com +short` must return `13.126.7.60`
+- Domain must resolve publicly: `dig natours.nitinkdevs.com +short` must return `13.126.7.60`
 - Port 80 must be open in EC2 Security Group (Certbot uses it for verification)
 - Nginx must be installed and running
 
@@ -164,7 +164,7 @@ This file is in the repo and gets copied to EC2 on every deploy by GitHub Action
 ```nginx
 server {
     listen 80;
-    server_name nitinkdevs.com www.nitinkdevs.com;
+    server_name natours.nitinkdevs.com www.natours.nitinkdevs.com;
 
     location / {
         proxy_pass         http://localhost:3000;
@@ -199,8 +199,8 @@ sudo certbot --nginx \
   --non-interactive \
   --agree-tos \
   --email nitinkwork18@gmail.com \
-  -d nitinkdevs.com \
-  -d www.nitinkdevs.com
+  -d natours.nitinkdevs.com \
+  -d www.natours.nitinkdevs.com
 ```
 
 Certbot will:
@@ -218,11 +218,11 @@ sudo certbot certificates
 Expected output:
 ```
 Found the following certs:
-  Certificate Name: nitinkdevs.com
-    Domains: nitinkdevs.com www.nitinkdevs.com
+  Certificate Name: natours.nitinkdevs.com
+    Domains: natours.nitinkdevs.com www.natours.nitinkdevs.com
     Expiry Date: 2026-08-XX (VALID: 89 days)
-    Certificate Path: /etc/letsencrypt/live/nitinkdevs.com/fullchain.pem
-    Private Key Path: /etc/letsencrypt/live/nitinkdevs.com/privkey.pem
+    Certificate Path: /etc/letsencrypt/live/natours.nitinkdevs.com/fullchain.pem
+    Private Key Path: /etc/letsencrypt/live/natours.nitinkdevs.com/privkey.pem
 ```
 
 ### Test auto-renewal
@@ -236,7 +236,7 @@ sudo certbot renew --dry-run
 The GitHub Actions pipeline skips Certbot on subsequent deploys (cert already exists) and only reloads Nginx:
 
 ```yaml
-if [ ! -d /etc/letsencrypt/live/nitinkdevs.com ]; then
+if [ ! -d /etc/letsencrypt/live/natours.nitinkdevs.com ]; then
   # First deploy — obtain cert
   sudo certbot --nginx ...
 else
@@ -261,15 +261,15 @@ No code changes needed — Nginx handles everything.
 After Certbot runs, Nginx automatically redirects all HTTP traffic to HTTPS:
 
 ```
-http://nitinkdevs.com     →  https://nitinkdevs.com  (301 redirect)
-http://www.nitinkdevs.com →  https://nitinkdevs.com  (301 redirect)
+http://natours.nitinkdevs.com     →  https://natours.nitinkdevs.com  (301 redirect)
+http://www.natours.nitinkdevs.com →  https://natours.nitinkdevs.com  (301 redirect)
 ```
 
 ### Troubleshooting SSL
 
 | Problem | Cause | Fix |
 |---------|-------|-----|
-| Certbot NXDOMAIN | DNS not propagated | Wait for `dig nitinkdevs.com +short` to return EC2 IP |
+| Certbot NXDOMAIN | DNS not propagated | Wait for `dig natours.nitinkdevs.com +short` to return EC2 IP |
 | Certbot NXDOMAIN | Domain on `clientHold` | Complete email verification in Route 53 Registered domains |
 | Certificate expired | Auto-renewal failed | Run `sudo certbot renew` manually |
 | ERR_SSL_PROTOCOL_ERROR | Nginx not reloaded after cert | Run `sudo systemctl reload nginx` |
@@ -317,7 +317,7 @@ sudo systemctl status nginx
 sudo certbot certificates
 ```
 
-Visit `https://nitinkdevs.com` in the browser.
+Visit `https://natours.nitinkdevs.com` in the browser.
 
 ---
 
@@ -345,7 +345,7 @@ docker logs app
 
 ### SSL cert fails (Certbot NXDOMAIN)
 - DNS must resolve publicly before running Certbot
-- Run `dig nitinkdevs.com +short` — must return the EC2 IP
+- Run `dig natours.nitinkdevs.com +short` — must return the EC2 IP
 - If domain is on `clientHold`, complete email verification first
 
 ### MongoDB connection error (querySrv EREFUSED)
