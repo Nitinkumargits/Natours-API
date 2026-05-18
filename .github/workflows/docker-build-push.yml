@@ -71,91 +71,14 @@ jobs:
           echo "✅ Successfully pushed:"
           echo "${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}"
           echo "${{ env.IMAGE_NAME }}:latest"
-  terraform:
-    name: Provision Infrastructure
+  deploy:
     needs: [build-and-push]
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: terraform
-
-    permissions:
-      contents: write
 
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      TF_VAR_my_ip: ${{ secrets.MY_IP }}
-
-    outputs:
-      ec2_ip: ${{ steps.ip.outputs.ip }}
-      ec2_id: ${{ steps.ip.outputs.id }}
-      ec2_az: ${{ steps.ip.outputs.az }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Derive public key from EC2_SSH_KEY
-        run: |
-          echo "${{ secrets.EC2_SSH_KEY }}" > /tmp/ssh_key
-          chmod 600 /tmp/ssh_key
-          PUBLIC_KEY=$(ssh-keygen -y -f /tmp/ssh_key)
-          rm /tmp/ssh_key
-          echo "TF_VAR_ec2_public_key=$PUBLIC_KEY" >> $GITHUB_ENV
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_wrapper: false
-
-      - name: Terraform Init
-        run: terraform init
-
-      - name: Terraform Validate
-        run: terraform validate
-
-      - name: Import existing Route 53 records
-        run: |
-          ZONE_ID=$(aws route53 list-hosted-zones-by-name \
-            --dns-name nitinkdevs.com \
-            --query "HostedZones[0].Id" \
-            --output text | sed 's|/hostedzone/||')
-          terraform import aws_route53_record.natours-a "${ZONE_ID}_natours.nitinkdevs.com_A" 2>/dev/null || true
-          terraform import aws_route53_record.natours-www "${ZONE_ID}_www.natours.nitinkdevs.com_A" 2>/dev/null || true
-
-      - name: Terraform Plan
-        run: terraform plan -out=tfplan
-
-      - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
-
-      - name: Output EC2 info
-        id: ip
-        run: |
-          echo "ip=$(terraform output -raw ec2_public_ip)" >> $GITHUB_OUTPUT
-          echo "id=$(terraform output -raw ec2_instance_id)" >> $GITHUB_OUTPUT
-          echo "az=$(terraform output -raw ec2_availability_zone)" >> $GITHUB_OUTPUT
-
-      - name: Commit state to GitHub
-        run: |
-          cd $GITHUB_WORKSPACE
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add terraform/terraform.tfstate
-          git diff --staged --quiet || git commit -m "chore: update terraform state [skip ci]"
-          git push
-
-  deploy:
-    needs: [terraform, build-and-push]
-    runs-on: ubuntu-latest
-
-    env:
-      HOST: ${{ needs.terraform.outputs.ec2_ip || secrets.EC2_HOST }}
-      INSTANCE_ID: ${{ needs.terraform.outputs.ec2_id }}
-      INSTANCE_AZ: ${{ needs.terraform.outputs.ec2_az }}
+      HOST: ${{ secrets.EC2_HOST }}
+      INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
+      INSTANCE_AZ: ${{ secrets.EC2_INSTANCE_AZ }}
       IMAGE_TAG: ${{ needs.build-and-push.outputs.image_version }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
