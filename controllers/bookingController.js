@@ -48,13 +48,17 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
       mode: 'payment',
     });
   } catch (err) {
-    // Never leak Stripe internals (incl. partial secret key) to the
-    // client. Log server-side and redirect with a generic alert.
     console.error('Stripe checkout session creation failed:', err.message);
-    return res.redirect(`/tour/${tour.slug}?alert=booking_failed`);
+    return res.status(502).json({
+      status: 'error',
+      message: 'Could not create Stripe checkout session. Please try again.',
+    });
   }
 
-  return res.redirect(303, session.url);
+  return res.status(200).json({
+    status: 'success',
+    session,
+  });
 });
 
 const createBookingCheckout = async (session) => {
